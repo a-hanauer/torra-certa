@@ -220,6 +220,48 @@ main { padding:4px 16px calc(var(--tab-h) + var(--safe-b) + 24px); max-width:560
 .seg-ctl button { flex:1; text-align:center; padding:8px 4px; border-radius:8px; font-size:13.5px; font-weight:600; color:var(--ink2); }
 .seg-ctl button.on { background:var(--card); color:var(--ink); box-shadow:0 1px 2px var(--shadow); }
 
+/* ---------- hoje: refinamentos ---------- */
+.herotop { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.stagebtn { display:inline-flex; align-items:center; gap:2px; font-size:12px; font-weight:600; color:var(--ink2); padding:4px 6px 4px 10px; border:1px solid var(--line); border-radius:20px; white-space:nowrap; }
+.stagebtn svg { width:14px; height:14px; }
+.signs { padding:4px 16px; }
+.signs .test:last-of-type { border-bottom:0; }
+.test .tn svg { width:13px; height:13px; stroke:var(--on-c); stroke-width:3.2; }
+.test.auto { cursor:default; }
+.test.auto .tn { border-style:dashed; }
+.test.auto.on .tn { border-style:solid; }
+.test em.ok { font-style:normal; font-weight:600; color:var(--test); }
+.nextlink { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 0 14px; border-top:1px solid var(--line); font-size:13.5px; color:var(--ink2); }
+.nextlink button { font-size:14px; font-weight:600; color:var(--ink); padding:4px 0; }
+.nextlink.ready span { color:var(--test); font-weight:600; }
+.nextlink.ready button { color:var(--test); }
+.winline { display:flex; align-items:center; gap:6px; flex:none; }
+.winline input { width:78px; font-size:16px; font-weight:600; text-align:right; border:1px solid var(--line); border-radius:8px; background:var(--field); padding:6px 8px; outline:0; -webkit-appearance:none; appearance:none; }
+.stagenav { display:flex; justify-content:space-between; gap:10px; margin-top:14px; }
+.stagenav button { flex:1; font-size:14.5px; font-weight:600; color:var(--ink); padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:var(--card); }
+.stagenav button small { display:block; font-size:11.5px; font-weight:500; color:var(--ink3); margin-bottom:1px; }
+.stagenav span { flex:1; }
+.stagenav button:last-child { color:var(--ink); text-align:right; }
+
+/* ---------- calendário: passado, hoje, futuro ---------- */
+.day.past { opacity:.5; }
+.day.past .n { font-weight:500; }
+.day.today { box-shadow:inset 0 0 0 2px var(--ink); border-radius:10px; margin:0 2.5px; border-color:transparent; z-index:1; }
+.day.estd { border-style:dashed; }
+.day.estd.jl { border-left-color:transparent; } .day.estd.jr { border-right-color:transparent; }
+.calhead { display:flex; align-items:baseline; justify-content:space-between; margin:4px 4px 0; font-size:13px; color:var(--ink2); }
+.calhead b { color:var(--ink); font-weight:600; }
+.legcard { margin-top:26px; }
+.legcard h4 { font-family:Lora, serif; font-size:17px; font-weight:600; margin-bottom:10px; }
+.leggrid { display:grid; grid-template-columns:1fr 1fr; gap:9px 12px; font-size:13px; color:var(--ink2); }
+.leggrid .lg { gap:8px; }
+.legsep { height:1px; background:var(--line); margin:14px 0; }
+.mini { width:26px; height:20px; border-radius:6px; border:1px solid var(--line); background:color-mix(in srgb, var(--dry) 16%, var(--card)); flex:none; position:relative; }
+.mini.past { opacity:.5; }
+.mini.today { box-shadow:inset 0 0 0 2px var(--ink); border-color:transparent; }
+.mini.estd { border-style:dashed; background-image:repeating-linear-gradient(135deg, transparent 0 4px, color-mix(in srgb, var(--card) 55%, transparent) 4px 6px); }
+.mini.ms::after { content:"◆"; position:absolute; right:3px; top:1px; font-size:7px; color:var(--dry); }
+
 /* ---------- tab bar ---------- */
 .tabs {
   position:fixed; left:0; right:0; bottom:0; z-index:30; display:flex; justify-content:space-around;
@@ -367,7 +409,7 @@ const STAGES = {
   rest:    { a:'o', l:'Descanso', s:'Descanso', est:21, min:14, ob:'Descansando', obd:'Já seco, guardado antes de descascar' },
   peel:    { a:'o', l:'Descasque', s:'Tirar casca', est:1, min:0, ob:'Pronto para descascar', obd:'Descanso concluído' },
   roast:   { a:'a', l:'Torra', s:'Torrar', est:1, min:0, ob:'Torrando', obd:'Café verde pronto para ir ao fogo' },
-  degas:   { a:'a', l:'Desgaseificação', s:'Desgaseificar', est:4, min:2, ob:'Torrado, esperando o gás sair', obd:'2 a 5 dias antes de moer' },
+  degas:   { a:'a', l:'Desgaseificação', s:'Esperar', est:4, min:2, ob:'Torrado, esperando o gás sair', obd:'2 a 5 dias antes de moer' },
   done:    { a:'', l:'Pronto para beber', s:'1º café', est:1, min:0, ob:'', obd:'' },
 };
 const stagesOf = lot => METHODS[lot.method].stages;
@@ -524,20 +566,38 @@ function stable(L) {
   return ok(a, b) && ok(b, c);
 }
 
-/* ---------- prontidão para avançar ---------- */
-function readiness(L) {
-  const k = curStage(L), n = diff(curStart(L), today()) + 1, e = estOf(L, k), t = today();
-  if (k === 'done') return null;
-  if (k === 'ferment') return (L.checks[t] || {}).rub ? 'Grãos ásperos no teste do atrito: hora de lavar e secar.' : null;
-  if (k === 'dry') {
-    if (L.tests.every(Boolean)) return 'Os 5 testes de ponto bateram: pode encerrar a secagem.';
-    if (stable(L)) return 'O peso estabilizou. Faça os testes de ponto.';
-    return null;
+/* ---------- sinais de que a etapa terminou ---------- */
+function signsFor(L, k, d) {
+  const n = diff(curStart(L), d || today()) + 1, e = estOf(L, k);
+  const S = (l, sub) => ({ l, sub });
+  const A = (l, sub, ok) => ({ l, sub, auto:true, ok });
+  switch (k) {
+    case 'harvest': return [S('Cerejas separadas', 'Verdes, secas, furadas e bichadas fora'), S('Teste da boia feito', 'As que boiaram foram descartadas'),
+      ...(L.method === 'natural' ? [S('Espalhadas para secar', 'Camada única, com ar por baixo')] : [])];
+    case 'pulp': return [S('Grãos soltos da polpa', 'Nenhuma cereja inteira sobrando'), S('Sem cascas no meio', 'Pedaços vermelhos catados'),
+      L.method === 'washed' ? S('Grãos cobertos com água', 'Prontos para fermentar') : S('Espalhados em camada fina', 'Sem lavar, prontos para secar')];
+    case 'ferment': return [S('Áspero ao esfregar', 'Nenhum ponto escorregadio, em grãos de cima, meio e fundo'),
+      S('Range como cascalho', 'Ao apertar um punhado na mão'), S('Teste do buraco', 'Escorrido, o buraco feito com o dedo na massa não desmorona')];
+    case 'dry': return testsFor(L).map(([a, b]) => S(a, b));
+    case 'rest': return [A(`${Math.min(n, e)} de ${e} dias de descanso`, 'O ideal é de 3 a 4 semanas', n >= e), S('Cheiro limpo', 'Sem mofo nem cheiro de umidade no saco')];
+    case 'peel': return [S('Sem casca', L.method === 'natural' ? 'Casca seca e pergaminho removidos' : 'Pergaminho removido'), S('Cascas sopradas', 'Só o café verde na peneira'), S('Defeitos separados', 'Grãos pretos, furados ou quebrados fora')];
+    case 'roast': return [S('Cor uniforme', 'No ponto escolhido, sem grãos crus'), S('Grãos frios', 'Esfriados rápido na peneira'), S('Guardados com tampa', 'Pote fechado, longe da luz')];
+    case 'degas': return [A(`${Math.min(n, 5)} de 2 a 5 dias desde a torra`, 'O gás precisa sair antes de moer', n >= 2)];
+    default: return [];
   }
-  if (k === 'rest') return n > e ? `Descanso de ${days(e)} completo: já pode descascar.` : null;
-  if (k === 'harvest' || k === 'pulp') return null;
-  return n > e ? 'O prazo típico desta etapa já passou.' : null;
 }
+function signVal(L, k, i) { if (k === 'dry') return !!L.tests[i]; return !!((L.signs || {})[k] || [])[i]; }
+function setSign(L, k, i) {
+  if (k === 'dry') { L.tests[i] = !L.tests[i]; L.testsDate = today(); }
+  else { L.signs = L.signs || {}; L.signs[k] = L.signs[k] || []; L.signs[k][i] = !L.signs[k][i]; }
+  save();
+}
+function signsState(L, k) {
+  const SG = signsFor(L, k), ok = SG.filter((x, i) => x.auto ? x.ok : signVal(L, k, i)).length;
+  return { SG, ok, all: SG.length > 0 && ok === SG.length };
+}
+// compatível com chamadas antigas
+function readiness(L) { const k = curStage(L); return k !== 'done' && signsState(L, k).all ? 'ok' : null; }
 
 /* =========================================================
    Render
@@ -559,85 +619,97 @@ function renderTrack(L, TL, t) {
 }
 
 function taskRow(L, d, t, k) {
-  const v = taskVal(L, d, t), done = isDone(L, d, t);
-  let ctl;
+  const v = taskVal(L, d, t), done = isDone(L, d, t), r = ref(L);
+  let ctl, subl = t.sub || '';
   if (t.count) ctl = `<div class="pips">${Array.from({ length:t.count }, (_, i) => `<button class="pip ${i < v ? 'on' : ''}" data-act="pip" data-d="${d}" data-id="${t.id}" data-i="${i}" aria-label="Vez ${i + 1}"></button>`).join('')}</div>`;
-  else if (t.weigh) ctl = v ? `<span class="go">${L.weights[d]} g</span>` : `<button class="go" data-act="goweigh" data-d="${d}">Pesar</button>`;
-  else if (t.tests) ctl = `<button class="go" data-act="gotests">${v ? 'Feito' : 'Abrir'}</button>`;
+  else if (t.weigh) {
+    const g = L.weights[d];
+    if (g != null && r) subl = `${Math.round(g / r * 100)}% da referência · meta ≈ ${METHODS[L.method].target}%`;
+    ctl = `<span class="winline"><input class="wIn" type="number" inputmode="decimal" placeholder="g" value="${g ?? ''}" aria-label="Peso em gramas"><button class="go" data-act="saveweigh" data-d="${d}">${g != null ? 'ok' : 'Salvar'}</button></span>`;
+  }
+  else if (t.tests) ctl = `<button class="go" data-act="gotests">${v ? 'Feito' : 'Ver'}</button>`;
   else ctl = `<button class="chk" data-act="chk" data-d="${d}" data-id="${t.id}" aria-label="Concluir">${ICON.check}</button>`;
-  return `<div class="task ${done ? 'done' : ''} p-${k}"><div class="tl">${t.l}<small>${t.sub || ''}</small></div>${ctl}</div>`;
+  return `<div class="task ${done ? 'done' : ''} p-${k}"><div class="tl">${t.l}<small>${subl}</small></div>${ctl}</div>`;
 }
 
 function renderHoje() {
   const L = lot(); if (!L) { $('#v-hoje').innerHTML = ''; return; }
   const t = today(), TL = timeline(L), T = tasksFor(L, t);
-  const k = curStage(L), ks = stagesOf(L), ci = ks.indexOf(k), next = ks[ci + 1], prev = ks[ci - 1];
+  const k = curStage(L), ks = stagesOf(L), ci = ks.indexOf(k), next = ks[ci + 1];
   const cs = TL[ci], n = diff(cs.a, t) + 1, sk = sub(L, cs, t) || k;
-  const rd = readiness(L);
   const title = k === 'dry' && SUBL[sk] ? SUBL[sk] : STAGES[k].l;
-  const plannedEnd = add(cs.a, Math.max(estOf(L, k), 1) - 1);
-  const left = diff(t, plannedEnd);
+  const plannedEnd = add(cs.a, Math.max(estOf(L, k), 1) - 1), left = diff(t, plannedEnd);
+
+  // 1. onde estou
   let h = `<div class="card hero p-${sk}">
-    <div class="when">${k === 'done' ? cap(fmtLong(t)) : `Dia ${n} · ${METHODS[L.method].l}`}</div>
+    <div class="herotop"><div class="when">${k === 'done' ? cap(fmtLong(t)) : `Dia ${n} · ${METHODS[L.method].l}`}</div>
+      <button class="stagebtn" data-act="stages" aria-label="Etapas">Etapa ${ci + 1} de ${ks.length}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
     <h2>${title}</h2>
     <div class="sub">${k === 'done' ? 'Bom café!' : `Desde ${fmtShort(cs.a)} · ${left > 0 ? `prazo típico até ${fmtShort(plannedEnd)}` : left === 0 ? 'prazo típico termina hoje' : `${days(-left)} além do prazo típico`}`}</div>
     ${renderTrack(L, TL, t)}
-    ${rd ? `<div class="ready"><span class="dot"></span><span>${rd}</span></div>` : ''}
-    <div class="actions">
-      ${prev ? `<button class="btn ghost back" data-act="rewind" aria-label="Voltar etapa">${ICON.back.replace('<svg', '<svg width="18" height="18" style="vertical-align:-4px"')}</button>` : ''}
-      ${next ? `<button class="btn ${rd ? 'green' : ''}" data-act="advance">Avançar para ${STAGES[next].l.toLowerCase()}</button>`
-             : `<button class="btn ghost" data-act="archive">Arquivar lote</button>`}
-    </div>
   </div>`;
 
-  h += `<div class="sec-title">Hoje<small>${T.list.length ? `${T.list.filter(x => isDone(L, t, x)).length} de ${T.list.length}` : fmtShort(t)}</small></div>`;
+  // 2. o que fazer hoje
+  h += `<div class="sec-title">O que fazer hoje<small>${T.list.length ? `${T.list.filter(x => isDone(L, t, x)).length} de ${T.list.length}` : fmtShort(t)}</small></div>`;
   h += `<div class="card tasks">${T.list.length ? T.list.map(x => taskRow(L, t, x, sk)).join('') : `<div class="empty">${T.msg}</div>`}</div>`;
 
-  if (k === 'dry') h += weighCard(L, t, n < 8);
-  if (k === 'dry' && n >= 8) h += testsCard(L);
+  // 3. como saber que terminou
+  if (k === 'done') {
+    h += `<div class="sec-title">Lote concluído</div><div class="card"><p style="font-size:14.5px;color:var(--ink2)">Anote como ficou o café no calendário. Quando quiser, arquive o lote.</p>
+      <div class="nextlink"><button data-act="archive">${L.archived ? 'Desarquivar lote' : 'Arquivar lote'}</button></div></div>`;
+  } else {
+    const st = signsState(L, k), stab = k === 'dry' && stable(L);
+    h += `<div class="sec-title" id="signsAnchor">Como saber que terminou<small>${st.ok} de ${st.SG.length}</small></div>
+    <div class="card p-test signs">
+      ${st.SG.map((x, i) => {
+        const on = x.auto ? x.ok : signVal(L, k, i);
+        return `<button class="test ${on ? 'on' : ''} ${x.auto ? 'auto' : ''}" ${x.auto ? 'disabled' : `data-act="sign" data-k="${k}" data-i="${i}"`}><span class="tn">${on ? ICON.check : i + 1}</span><span><b>${x.l}</b><p>${x.sub}${k === 'dry' && i === 0 && stab ? ' · <em class="ok">o peso estabilizou</em>' : ''}</p></span></button>`;
+      }).join('')}
+      ${k === 'dry' && n < 15 ? `<p class="hint" style="text-align:left;margin:4px 0 12px">Os testes começam a fazer sentido a partir do dia 15.</p>` : ''}
+      ${st.all && next ? `<div class="nextlink ready"><span>Etapa concluída</span><button data-act="advance">Avançar para ${STAGES[next].l.toLowerCase()} ›</button></div>` : ''}
+    </div>`;
+  }
 
-  h += `<div class="sec-title">Etapas<small>toque para editar</small></div><div class="card stages">${TL.map(s => {
-    const st = STAGES[s.k], c = sub(L, s, s.state === 'cur' ? t : s.a);
-    const right = s.state === 'cur' ? 'agora' : s.state === 'past' ? '' : (s.a <= s.b ? `${diff(t, s.a) <= 0 ? '' : 'em ' + days(diff(t, s.a))}` : '');
-    const dt = s.state === 'fut' ? (s.a <= s.b ? `${range(s.a, s.b)} · est.` : `${fmtShort(s.a)} · est.`)
-             : s.state === 'cur' ? `desde ${fmtShort(s.a)}` : (s.a <= s.b ? range(s.a, s.b) : fmtShort(s.a));
-    return `<button class="stg ${s.state} p-${s.state === 'cur' ? c : s.k}" data-act="stage" data-k="${s.k}">
-      <span class="rail"><span class="node">${s.state === 'past' ? ICON.check : ''}</span><span class="ln"></span></span>
-      <span class="body"><span><span class="nm">${st.l}</span><span class="dt" style="display:block">${dt}</span></span><span class="rt">${right}</span></span></button>`;
-  }).join('')}</div>`;
-
+  // 4. pontos de atenção
   h += alertCard(L, k);
   $('#v-hoje').innerHTML = h;
 }
 
-function weighCard(L, d, optional) {
-  const r = ref(L), g = L.weights[d];
-  return `<div class="sec-title">Peso${optional ? '<small>diário a partir do dia 8</small>' : ''}</div>
-  <div class="card">
-    <div class="wrow"><label class="field"><input class="wIn" type="number" inputmode="decimal" placeholder="0" value="${g ?? ''}"><span>g</span></label>
-    <button class="btn" data-act="saveweigh" data-d="${d}">${g != null ? 'Atualizar' : 'Salvar'}</button></div>
-    ${r && g != null ? `<div class="hint">${Math.round(g / r * 100)}% do peso de referência (${r} g) · meta ≈ ${METHODS[L.method].target}%</div>` : ''}
-  </div>`;
-}
-function testsCard(L) {
-  const TS = testsFor(L), ok = L.tests.filter(Boolean).length, st = stable(L);
-  return `<div class="sec-title" id="testsAnchor">Está seco?<small>${L.testsDate ? `último teste ${fmt(L.testsDate)}` : 'a partir do dia 15'}</small></div>
-  <div class="card p-test" style="padding:4px 16px 16px">
-    ${TS.map(([a, b], i) => `<button class="test ${L.tests[i] ? 'on' : ''}" data-act="test" data-i="${i}"><span class="tn">${i + 1}</span><span><b>${a}</b><p>${b}${i === 0 && st ? ' · <b style="color:var(--test);font-size:13px">o peso estabilizou</b>' : ''}</p></span></button>`).join('')}
-    <div class="hint">${ok === 5 ? 'Tudo ok. Use “Avançar para descanso” lá em cima.' : `${ok} de 5 testes ok. Quando os 5 baterem, a secagem terminou.`}</div>
-  </div>`;
-}
 function alertCard(L, k) {
   const A = {
-    ferment:[['Cheiro de vinagre forte, podre ou de queijo', 'passou do ponto. Lave bem e vá para a secagem.']],
+    harvest:[['Cerejas amontoadas', 'fermentam e mofam em poucas horas. Processe no mesmo dia.']],
+    pulp:[['Demora', 'despolpe e comece a fermentar ou secar no mesmo dia da colheita.'], ['Cascas no meio', 'causam mofo e sabor estranho.']],
+    ferment:[['Cheiro de vinagre forte, podre ou de queijo', 'passou do ponto. Lave bem e vá para a secagem.'], ['Frio', 'a fermentação fica mais lenta. Confie no teste, não no relógio.']],
     dry:[['Mofo branco, verde ou preto', 'separe os grãos afetados e aumente a ventilação.'],
          ['Calor', 'nunca acima de 40 °C. Longe de banheiro e cozinha.'],
-         ['Grão esbranquiçado e farelento', 'secou demais.']],
-    rest:[['Cheiro de mofo ou umidade no saco', 'abra, espalhe e volte a secar por 1 ou 2 dias.']],
-    roast:[['Fumaça', 'é normal. Torre perto de janela aberta ou exaustor.']],
+         ['Grão esbranquiçado e farelento', 'secou demais.'],
+         ...(L.method === 'honey' ? [['Grãos grudados', 'solte-os ao revirar; é onde o mofo começa.']] : []),
+         ...(L.method === 'natural' ? [['Chuva e sereno', 'recolha ou cubra à noite.']] : [])],
+    rest:[['Cheiro de mofo ou umidade no saco', 'abra, espalhe e volte a secar por 1 ou 2 dias.'], ['Saco plástico', 'abafa e mofa. Use pano ou papel.']],
+    peel:[['Grãos defeituosos', 'um grão preto ou mofado já estraga o sabor da xícara.']],
+    roast:[['Fumaça', 'é normal. Torre perto de janela aberta ou exaustor.'], ['Torra desigual', 'mexa sempre e torre pouco por vez.']],
+    degas:[['Moer cedo demais', 'o gás atrapalha a extração e o café fica sem graça.']],
   }[k];
   if (!A) return '';
   return `<div class="sec-title">Atenção</div><div class="card alert">${A.map(([a, b]) => `<p><b>${a}:</b> ${b}</p>`).join('')}</div>`;
+}
+
+function stagesSheet() {
+  sheetCtx = [stagesSheet];
+  const L = lot(), t = today(), TL = timeline(L), ks = stagesOf(L), k = curStage(L), ci = ks.indexOf(k), next = ks[ci + 1], prev = ks[ci - 1];
+  openSheet(`<div class="shead"><div><h3>Etapas</h3><p class="lead">${METHODS[L.method].l} · toque numa etapa para corrigir a data</p></div>${closeBtn}</div>
+  <div class="card stages">${TL.map(s => {
+    const c = sub(L, s, s.state === 'cur' ? t : s.a);
+    const right = s.state === 'cur' ? 'agora' : s.state === 'fut' && s.a > t ? 'em ' + days(diff(t, s.a)) : '';
+    const dt = s.state === 'fut' ? `${s.a <= s.b ? range(s.a, s.b) : fmtShort(s.a)} · est.` : s.state === 'cur' ? `desde ${fmtShort(s.a)}` : (s.a <= s.b ? range(s.a, s.b) : fmtShort(s.a));
+    return `<button class="stg ${s.state} p-${s.state === 'cur' ? c : s.k}" data-act="stage" data-k="${s.k}">
+      <span class="rail"><span class="node">${s.state === 'past' ? ICON.check : ''}</span><span class="ln"></span></span>
+      <span class="body"><span><span class="nm">${STAGES[s.k].l}</span><span class="dt" style="display:block">${dt}</span></span><span class="rt">${right}</span></span></button>`;
+  }).join('')}</div>
+  <div class="stagenav">
+    ${prev ? `<button data-act="rewind"><small>‹ Voltar para</small>${STAGES[prev].l}</button>` : '<span></span>'}
+    ${next ? `<button data-act="advance"><small>Avançar para ›</small>${STAGES[next].l}</button>` : ''}
+  </div>`);
 }
 
 /* ---------- calendário ---------- */
@@ -647,7 +719,19 @@ function renderCal() {
   const keys = [];
   vis.forEach(s => { if (s.k === 'dry') keys.push('crit', 'dry', 'test'); else keys.push(s.k); });
   const LBL = { crit:'Fase crítica', dry:'Secagem', test:'Testes de ponto' };
-  let h = `<div class="legend">${[...new Set(keys)].map(k => `<span class="lg p-${k}"><i class="sw"></i>${LBL[k] || STAGES[k].l}</span>`).join('')}</div>`;
+  const cur = TL.find(x => x.state === 'cur'), ck = sub(L, cur, t);
+  let h = `<div class="calhead"><span>Hoje: <b>${SUBL[ck] || STAGES[cur.k].l}</b></span><span>${fmtShort(t)}</span></div>`;
+  const legend = `<div class="card legcard"><h4>Legenda</h4>
+    <div class="leggrid">${[...new Set(keys)].map(k => `<span class="lg p-${k}"><i class="sw"></i>${LBL[k] || STAGES[k].l}</span>`).join('')}</div>
+    <div class="legsep"></div>
+    <div class="leggrid">
+      <span class="lg"><i class="mini past"></i>Já passou</span>
+      <span class="lg"><i class="mini today"></i>Hoje</span>
+      <span class="lg"><i class="mini"></i>Planejado</span>
+      <span class="lg"><i class="mini estd"></i>Estimado</span>
+      <span class="lg"><i class="mini ms"></i>Início de etapa</span>
+    </div>
+    <p class="hint" style="text-align:left;margin-top:14px">Toque num dia para ver tarefas, peso e anotações.</p></div>`;
   const s0 = parse(vis[0].a), e0 = parse(vis[vis.length - 1].b);
   const startOf = d => TL.filter(s => s.a === d);
   for (let y = s0.getFullYear(), m = s0.getMonth(); y < e0.getFullYear() || (y === e0.getFullYear() && m <= e0.getMonth()); m === 11 ? (y++, m = 0) : m++) {
@@ -664,15 +748,15 @@ function renderCal() {
       if (k) { cls.push('p-' + k); if (['crit','pulp','peel','roast','done'].includes(k)) cls.push('strong'); if (s.est) cls.push('estd'); }
       if (k && kp === k) cls.push('jl');
       if (k && kn === k) cls.push('jr');
-      if (d === t) cls.push('today');
+      if (d === t) cls.push('today'); else if (d < t) cls.push('past');
       const logged = L.weights[d] != null || L.notes[d] || L.checks[d];
-      const sym = ms ? (ms.k === 'done' ? '★' : ms.state === 'fut' ? '◇' : '◆') : '';
+      const sym = ms ? (ms.k === 'done' ? '★' : '◆') : '';
       cells += `<div class="${cls.join(' ')}" role="button" tabindex="0" ${k ? `data-p="${k}"` : ''} data-act="day" data-d="${d}">
         <span class="n">${dd}</span>${ms ? `<span class="mk p-${ms.k}">${sym}</span><span class="ms">${STAGES[ms.k].s}</span>` : (logged ? `<span class="dots">${L.weights[d] != null ? '<i></i>' : ''}${L.notes[d] ? '<i></i>' : ''}${L.checks[d] && L.weights[d] == null && !L.notes[d] ? '<i></i>' : ''}</span>` : '')}</div>`;
     }
     h += `<div class="month"><h3>${MESES[m]}<span>${y}</span></h3><div class="grid">${cells}</div></div>`;
   }
-  h += `<div class="hint" style="margin-top:18px">Toque num dia para ver tarefas, peso e anotações. Dias hachurados são estimativas; ◆ início de etapa.</div>`;
+  h += legend;
   $('#v-cal').innerHTML = h;
 }
 
@@ -749,7 +833,7 @@ let guideMethod = null;
 function renderGuia() {
   const L = lot(); if (!L) return;
   const m = guideMethod || L.method;
-  let h = `<div class="sec-title">Etapas<small>${METHODS[m].l.toLowerCase()}</small></div>
+  let h = `<div class="sec-title">Etapas</div>
     <div class="seg-ctl">${Object.keys(METHODS).map(k => `<button class="${k === m ? 'on' : ''}" data-act="guidem" data-m="${k}">${METHODS[k].l}</button>`).join('')}</div>
     <p class="hint" style="text-align:left;margin:10px 4px 14px">${METHODS[m].d}</p>`;
   h += METHODS[m].stages.map((k, i) => {
@@ -936,13 +1020,15 @@ document.addEventListener('click', async e => {
     case 'chk': setTask(L, d, b.dataset.id, taskVal(L, d, { id:b.dataset.id }) ? 0 : 1); rr(); break;
     case 'pip': { const cur = taskVal(L, d, { id:b.dataset.id }), i = +b.dataset.i; setTask(L, d, b.dataset.id, cur === i + 1 ? i : i + 1); rr(); break; }
     case 'goweigh': { const el = (b.closest('#sheetBody') || document).querySelector('.wIn'); el?.scrollIntoView({ behavior:'smooth', block:'center' }); setTimeout(() => el?.focus(), 300); break; }
-    case 'gotests': if (sheetCtx) closeSheet(); setTimeout(() => $('#testsAnchor')?.scrollIntoView({ behavior:'smooth', block:'start' }), 50); break;
+    case 'gotests': if (sheetCtx) closeSheet(); setTimeout(() => $('#signsAnchor')?.scrollIntoView({ behavior:'smooth', block:'start' }), 50); break;
     case 'saveweigh': {
       const inp = b.parentElement.querySelector('.wIn'), v = parseFloat(inp && inp.value);
       if (!(v > 0)) { toast('Digite o peso em gramas'); break; }
       L.weights[d] = Math.round(v * 10) / 10; save(); toast(`${L.weights[d]} g em ${fmt(d)}`); rr(); break; }
     case 'delweigh': if (confirm(`Apagar o peso de ${fmt(d)}?`)) { delete L.weights[d]; save(); renderAll(); } break;
     case 'test': L.tests[+b.dataset.i] = !L.tests[+b.dataset.i]; L.testsDate = today(); save(); renderAll(); break;
+    case 'sign': setSign(L, b.dataset.k, +b.dataset.i); renderAll(); break;
+    case 'stages': stagesSheet(); break;
 
     /* etapas */
     case 'advance': advanceSheet(); break;
@@ -952,7 +1038,7 @@ document.addEventListener('click', async e => {
       L.log.push({ k:b.dataset.k, d:dt }); save(); closeSheet(); toast(`Agora: ${STAGES[b.dataset.k].l.toLowerCase()}`); window.scrollTo({ top:0, behavior:'smooth' }); break; }
     case 'rewind': {
       const k = curStage(L), ks = stagesOf(L), pk = ks[ks.indexOf(k) - 1];
-      if (confirm(`Voltar para ${STAGES[pk].l.toLowerCase()}? O início de ${STAGES[k].l.toLowerCase()} (${fmt(curStart(L))}) será desfeito.`)) { L.log.pop(); save(); renderAll(); toast(`Voltou para ${STAGES[pk].l.toLowerCase()}`); }
+      if (confirm(`Voltar para ${STAGES[pk].a} ${STAGES[pk].l.toLowerCase()}? O início ${STAGES[k].a === 'o' ? 'do' : 'da'} ${STAGES[k].l.toLowerCase()} (${fmt(curStart(L))}) será desfeito.`)) { L.log.pop(); save(); rr(); toast(`Voltou para ${STAGES[pk].l.toLowerCase()}`); }
       break; }
     case 'rewindto': {
       const k = b.dataset.k, i = L.log.findIndex(x => x.k === k);
@@ -1052,6 +1138,7 @@ document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () =>
   document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x === t));
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + t.dataset.v));
   window.scrollTo({ top:0 });
+  if (t.dataset.v === 'cal') { const el = $('#v-cal .day.today'); if (el) { const y = el.getBoundingClientRect().top + scrollY - innerHeight * .35; window.scrollTo({ top:Math.max(0, y) }); } }
 }));
 window.addEventListener('scroll', () => $('#top').classList.toggle('scrolled', scrollY > 4), { passive:true });
 
