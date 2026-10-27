@@ -1,5 +1,5 @@
 // Torra Certa — cache para funcionar offline
-const CACHE = 'torra-certa-v1';
+const CACHE = 'torra-certa-v2';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icons/apple-touch-icon.png', './icons/icon-192.png'];
 
 self.addEventListener('install', e => {

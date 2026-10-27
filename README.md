@@ -1,14 +1,17 @@
 # Torra Certa
 
-Webapp para acompanhar o processamento caseiro de café, da colheita à xícara: secagem, testes de ponto, descanso, descasque e torra.
+Webapp para acompanhar lotes de café caseiro, da colheita à xícara. Funciona offline e pode ser instalado na tela de início do iPhone.
 
-- **Hoje:** fase atual, tarefas do dia e próximo marco.
+- **Onboarding:** nome do lote, método (lavado, natural ou honey) e em que etapa o café está agora, em qualquer ponto do processo.
+- **Lotes:** acompanhe vários ao mesmo tempo; arquive os prontos.
+- **Hoje:** etapa atual, tarefas do dia, aviso quando parece hora de avançar, e botões para avançar ou voltar etapa.
+- **Etapas:** linha do tempo com datas reais e estimadas; toque numa etapa para corrigir a data ou voltar até ela.
 - **Calendário:** fases por cor; toque num dia para tarefas, peso e anotações.
-- **Peso:** registro diário, % do peso pós-lavagem e curva até a meta de ~50%.
-- **Guia:** o que fazer em cada etapa, os 5 testes de ponto e sinais de alerta.
+- **Peso:** registro diário, % do peso de referência e curva até a meta.
+- **Guia:** o que fazer em cada etapa, por método, e os testes de ponto.
 
-Os dados ficam só no aparelho (localStorage). Use **Ajustes → Copiar backup** para guardar uma cópia.
+Os dados ficam só no aparelho (localStorage). Use **Lotes → Copiar backup** para guardar uma cópia.
 
 ## Instalar no iPhone
-1. Abra o link do GitHub Pages no Safari.
+1. Abra https://a-hanauer.github.io/torra-certa/ no Safari.
 2. Compartilhar → **Adicionar à Tela de Início**.
