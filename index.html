@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Torra Certa</title>
 <meta name="description" content="Acompanhe o processamento caseiro de café, da colheita à xícara.">
-<meta name="theme-color" content="#F7F2EA">
-<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#F7F2EA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1E140E" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -22,8 +23,27 @@
   --paper:#F7F2EA; --card:#FBF8F3; --ink:#2B1D14; --ink2:#6E5A4B; --ink3:#A08C7C; --line:#E4D9CA;
   --harvest:#7E5E47; --pulp:#A87B5D; --ferment:#C29A6B; --crit:#B4452F; --dry:#D9893B; --test:#7A8A3E;
   --rest:#5E7A8C; --peel:#6B4A35; --roast:#4A2F1F; --degas:#A0755A; --done:#2B1D14;
+  --field:#FFFFFF; --on-c:#FFFFFF; --scrim:rgba(43,29,20,.32); --shadow:rgba(43,29,20,.12);
+  color-scheme:light;
   --safe-t:env(safe-area-inset-top); --safe-b:env(safe-area-inset-bottom);
   --tab-h:58px;
+}
+/* ---------- modo escuro: fundo de café ---------- */
+:root[data-theme="dark"] {
+  --paper:#1E140E; --card:#2A1D15; --ink:#F3E9DC; --ink2:#C9B39D; --ink3:#937D6B; --line:#3E2D22;
+  --harvest:#A88468; --pulp:#C49573; --ferment:#D6B285; --crit:#E2694D; --dry:#E9A04E; --test:#A6B75E;
+  --rest:#82A3B8; --peel:#B07E5A; --roast:#94603F; --degas:#C79A80; --done:#F3E9DC;
+  --field:#34251B; --on-c:#1E140E; --scrim:rgba(0,0,0,.55); --shadow:rgba(0,0,0,.4);
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:#1E140E; --card:#2A1D15; --ink:#F3E9DC; --ink2:#C9B39D; --ink3:#937D6B; --line:#3E2D22;
+    --harvest:#A88468; --pulp:#C49573; --ferment:#D6B285; --crit:#E2694D; --dry:#E9A04E; --test:#A6B75E;
+    --rest:#82A3B8; --peel:#B07E5A; --roast:#94603F; --degas:#C79A80; --done:#F3E9DC;
+    --field:#34251B; --on-c:#1E140E; --scrim:rgba(0,0,0,.55); --shadow:rgba(0,0,0,.4);
+    color-scheme:dark;
+  }
 }
 * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
 html, body { background:var(--paper); }
@@ -89,7 +109,7 @@ main { padding:4px 16px calc(var(--tab-h) + var(--safe-b) + 24px); max-width:560
 .stg { display:flex; gap:12px; align-items:stretch; width:100%; }
 .stg .rail { width:22px; flex:none; display:flex; flex-direction:column; align-items:center; }
 .stg .node { width:22px; height:22px; border-radius:11px; border:2px solid var(--line); background:var(--card); display:grid; place-items:center; margin-top:10px; flex:none; }
-.stg .node svg { width:12px; height:12px; stroke:#fff; stroke-width:3.2; }
+.stg .node svg { width:12px; height:12px; stroke:var(--on-c); stroke-width:3.2; }
 .stg .ln { flex:1; width:2px; background:var(--line); margin:3px 0 -10px; }
 .stg:last-child .ln { visibility:hidden; }
 .stg.past .node { background:var(--c); border-color:var(--c); }
@@ -113,7 +133,7 @@ main { padding:4px 16px calc(var(--tab-h) + var(--safe-b) + 24px); max-width:560
 .task .tl small { display:block; font-size:12.5px; color:var(--ink3); margin-top:2px; }
 .task.done .tl { color:var(--ink3); }
 .chk { width:26px; height:26px; flex:none; border-radius:8px; border:1.5px solid var(--ink3); display:grid; place-items:center; transition:all .15s; }
-.chk svg { width:15px; height:15px; stroke:#fff; stroke-width:3; opacity:0; }
+.chk svg { width:15px; height:15px; stroke:var(--on-c); stroke-width:3; opacity:0; }
 .task.done .chk { background:var(--c, var(--ink)); border-color:var(--c, var(--ink)); }
 .task.done .chk svg { opacity:1; }
 .pips { display:flex; gap:6px; flex:none; }
@@ -126,7 +146,7 @@ main { padding:4px 16px calc(var(--tab-h) + var(--safe-b) + 24px); max-width:560
 .test { display:flex; gap:12px; align-items:flex-start; padding:12px 0; border-bottom:1px solid var(--line); width:100%; }
 .test:last-of-type { border-bottom:0; }
 .tn { width:26px; height:26px; flex:none; border-radius:13px; border:1.5px solid var(--test); color:var(--test); font-size:12px; font-weight:700; display:grid; place-items:center; transition:all .15s; }
-.test.on .tn { background:var(--test); color:#fff; }
+.test.on .tn { background:var(--test); color:var(--on-c); }
 .test b { font-size:15px; font-weight:600; }
 .test p { font-size:13px; color:var(--ink2); margin-top:2px; line-height:1.35; }
 .btn { display:block; width:100%; text-align:center; padding:14px; border-radius:12px; background:var(--ink); color:var(--paper); font-weight:600; font-size:15px; margin-top:14px; }
@@ -137,7 +157,7 @@ main { padding:4px 16px calc(var(--tab-h) + var(--safe-b) + 24px); max-width:560
 
 /* ---------- weight ---------- */
 .wrow { display:flex; gap:10px; align-items:stretch; }
-.field { flex:1; display:flex; align-items:center; border:1px solid var(--line); border-radius:12px; background:#fff; padding:0 14px; }
+.field { flex:1; display:flex; align-items:center; border:1px solid var(--line); border-radius:12px; background:var(--field); padding:0 14px; }
 .field input { flex:1; width:100%; border:0; outline:0; background:transparent; font-size:22px; font-weight:600; padding:12px 0; }
 .field span { color:var(--ink3); font-size:15px; }
 .wrow .btn { width:auto; margin:0; padding:0 22px; }
@@ -195,7 +215,7 @@ main { padding:4px 16px calc(var(--tab-h) + var(--safe-b) + 24px); max-width:560
 .alert b { font-weight:600; }
 .seg-ctl { display:flex; background:var(--line); border-radius:10px; padding:3px; margin:4px 0 0; }
 .seg-ctl button { flex:1; text-align:center; padding:8px 4px; border-radius:8px; font-size:13.5px; font-weight:600; color:var(--ink2); }
-.seg-ctl button.on { background:var(--card); color:var(--ink); box-shadow:0 1px 2px rgba(43,29,20,.12); }
+.seg-ctl button.on { background:var(--card); color:var(--ink); box-shadow:0 1px 2px var(--shadow); }
 
 /* ---------- tab bar ---------- */
 .tabs {
@@ -209,7 +229,7 @@ main { padding:4px 16px calc(var(--tab-h) + var(--safe-b) + 24px); max-width:560
 .tab.on { color:var(--ink); }
 
 /* ---------- sheet ---------- */
-.scrim { position:fixed; inset:0; z-index:40; background:rgba(43,29,20,.32); opacity:0; pointer-events:none; transition:opacity .25s; }
+.scrim { position:fixed; inset:0; z-index:40; background:var(--scrim); opacity:0; pointer-events:none; transition:opacity .25s; }
 .scrim.on { opacity:1; pointer-events:auto; }
 .sheet {
   position:fixed; left:0; right:0; bottom:0; z-index:41; max-height:88dvh; overflow:auto; -webkit-overflow-scrolling:touch;
@@ -225,13 +245,13 @@ main { padding:4px 16px calc(var(--tab-h) + var(--safe-b) + 24px); max-width:560
 .close { width:32px; height:32px; border-radius:16px; background:var(--line); display:grid; place-items:center; flex:none; }
 .close svg { width:14px; height:14px; stroke:var(--ink2); stroke-width:2.4; }
 .lbl { font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--ink3); margin:18px 2px 7px; }
-textarea { width:100%; min-height:84px; border:1px solid var(--line); border-radius:12px; background:#fff; padding:12px 14px; font-size:16px; resize:vertical; outline:0; }
+textarea { width:100%; min-height:84px; border:1px solid var(--line); border-radius:12px; background:var(--field); padding:12px 14px; font-size:16px; resize:vertical; outline:0; }
 .set { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 0; border-bottom:1px solid var(--line); font-size:15px; width:100%; }
 .set:last-child { border-bottom:0; }
 .set small { display:block; color:var(--ink3); font-size:12.5px; }
-.set input[type=date], .set input[type=number], .set input[type=text] { font-size:16px; border:1px solid var(--line); background:#fff; border-radius:9px; padding:7px 9px; min-width:0; max-width:170px; text-align:right; -webkit-appearance:none; appearance:none; }
+.set input[type=date], .set input[type=number], .set input[type=text] { font-size:16px; border:1px solid var(--line); background:var(--field); border-radius:9px; padding:7px 9px; min-width:0; max-width:170px; text-align:right; -webkit-appearance:none; appearance:none; }
 .set input[type=number] { width:90px; }
-.stepper { display:flex; align-items:center; border:1px solid var(--line); border-radius:9px; background:#fff; flex:none; }
+.stepper { display:flex; align-items:center; border:1px solid var(--line); border-radius:9px; background:var(--field); flex:none; }
 .stepper button { width:34px; height:34px; font-size:18px; color:var(--ink2); text-align:center; }
 .stepper span { min-width:28px; text-align:center; font-weight:600; }
 .danger { color:var(--crit); }
@@ -697,11 +717,11 @@ function chart(w, r, tg) {
   const pts = w.map(x => `${X(x.d).toFixed(1)},${Y(x.g).toFixed(1)}`).join(' ');
   const ticks = [hi - pv, (hi + lo) / 2, lo + pv].map(v => Math.round(v));
   return `<svg class="chart" viewBox="0 0 ${W} ${H}" font-family="Inter" font-size="10">
-    ${ticks.map(v => `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="#E4D9CA"/><text x="${L - 6}" y="${Y(v) + 3.5}" text-anchor="end" fill="#A08C7C">${v}</text>`).join('')}
-    ${target ? `<line x1="${L}" x2="${W - R}" y1="${Y(target)}" y2="${Y(target)}" stroke="#7A8A3E" stroke-dasharray="4 4"/><text x="${L + 4}" y="${Y(target) + 13}" fill="#7A8A3E" font-weight="600">meta ${tg}%</text>` : ''}
-    <polyline points="${pts}" fill="none" stroke="#D9893B" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
-    ${w.map(x => `<circle cx="${X(x.d)}" cy="${Y(x.g)}" r="3.2" fill="#FBF8F3" stroke="#D9893B" stroke-width="2"/>`).join('')}
-    <text x="${L}" y="${H - 5}" fill="#A08C7C">${fmt(d0)}</text><text x="${W - R}" y="${H - 5}" text-anchor="end" fill="#A08C7C">${fmt(dN)}</text>
+    ${ticks.map(v => `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" style="stroke:var(--line)"/><text x="${L - 6}" y="${Y(v) + 3.5}" text-anchor="end" style="fill:var(--ink3)">${v}</text>`).join('')}
+    ${target ? `<line x1="${L}" x2="${W - R}" y1="${Y(target)}" y2="${Y(target)}" style="stroke:var(--test)" stroke-dasharray="4 4"/><text x="${L + 4}" y="${Y(target) + 13}" style="fill:var(--test)" font-weight="600">meta ${tg}%</text>` : ''}
+    <polyline points="${pts}" fill="none" style="stroke:var(--dry)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${w.map(x => `<circle cx="${X(x.d)}" cy="${Y(x.g)}" r="3.2" style="fill:var(--card);stroke:var(--dry)" stroke-width="2"/>`).join('')}
+    <text x="${L}" y="${H - 5}" style="fill:var(--ink3)">${fmt(d0)}</text><text x="${W - R}" y="${H - 5}" text-anchor="end" style="fill:var(--ink3)">${fmt(dN)}</text>
   </svg>`;
 }
 
@@ -797,6 +817,8 @@ function lotsSheet() {
     <div class="card" style="padding:2px 16px">${act.length ? act.map(row).join('') : '<div class="empty">Nenhum lote ativo.</div>'}</div>
     <button class="btn" data-act="newlot">Novo lote</button>
     ${arc.length ? `<div class="lbl">Arquivados</div><div class="card" style="padding:2px 16px">${arc.map(row).join('')}</div>` : ''}
+    <div class="lbl">Aparência</div>
+    <div class="seg-ctl">${[['auto','Automático'],['light','Claro'],['dark','Escuro']].map(([k, l]) => `<button class="${(DB.theme || 'auto') === k ? 'on' : ''}" data-act="theme" data-t="${k}">${l}</button>`).join('')}</div>
     <div class="lbl">Dados</div><div class="card" style="padding:2px 16px">
       <div class="set"><span>Copiar backup<small>Todos os lotes ficam só neste aparelho</small></span><button class="go" data-act="export">Copiar</button></div>
       <div class="set"><span>Restaurar backup</span><button class="go" data-act="import">Colar</button></div>
@@ -944,12 +966,23 @@ document.addEventListener('click', async e => {
     case 'dellot':
       if (confirm(`Apagar “${L.name}” e todos os registros dele?`)) {
         DB.lots = DB.lots.filter(x => x.id !== L.id); DB.active = (DB.lots.find(x => !x.archived) || DB.lots[0] || {}).id || null; save(); closeSheet();
-        if (!DB.lots.length) startOnboarding(true);
+        function applyTheme() {
+  const t = DB.theme || 'auto', root = document.documentElement;
+  if (t === 'auto') root.removeAttribute('data-theme'); else root.dataset.theme = t;
+  const dark = t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.querySelectorAll('meta[name=theme-color]').forEach((m, i) => {
+    if (t === 'auto') { m.setAttribute('content', i ? '#1E140E' : '#F7F2EA'); m.setAttribute('media', `(prefers-color-scheme: ${i ? 'dark' : 'light'})`); }
+    else { m.setAttribute('content', dark ? '#1E140E' : '#F7F2EA'); m.removeAttribute('media'); }
+  });
+}
+applyTheme();
+if (!DB.lots.length) startOnboarding(true);
       }
       break;
     case 'settings': settingsSheet(); break;
     case 'day': daySheet(d); break;
     case 'close': closeSheet(); break;
+    case 'theme': DB.theme = b.dataset.t; save(); applyTheme(); lotsSheet(); break;
     case 'guidem': guideMethod = b.dataset.m; renderGuia(); break;
     case 'export': try { await navigator.clipboard.writeText(JSON.stringify(DB)); toast('Backup copiado'); } catch (_) { prompt('Copie o backup:', JSON.stringify(DB)); } break;
     case 'import': { const txt = prompt('Cole o backup:'); if (!txt) break; try { const d2 = JSON.parse(txt); if (!d2.lots) throw 0; DB = d2; save(); closeSheet(); toast('Backup restaurado'); } catch (_) { toast('Backup inválido'); } break; }
@@ -1014,6 +1047,16 @@ function renderAll() {
 let lastDay = today();
 document.addEventListener('visibilitychange', () => { if (!document.hidden && today() !== lastDay) { lastDay = today(); renderAll(); } });
 
+function applyTheme() {
+  const t = DB.theme || 'auto', root = document.documentElement;
+  if (t === 'auto') root.removeAttribute('data-theme'); else root.dataset.theme = t;
+  const dark = t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.querySelectorAll('meta[name=theme-color]').forEach((m, i) => {
+    if (t === 'auto') { m.setAttribute('content', i ? '#1E140E' : '#F7F2EA'); m.setAttribute('media', `(prefers-color-scheme: ${i ? 'dark' : 'light'})`); }
+    else { m.setAttribute('content', dark ? '#1E140E' : '#F7F2EA'); m.removeAttribute('media'); }
+  });
+}
+applyTheme();
 if (!DB.lots.length) startOnboarding(true);
 else { if (!lot()) DB.active = DB.lots[0].id; save(); renderAll(); }
 
