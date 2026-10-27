@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Torra Certa</title>
+<meta name="description" content="Acompanhamento do processamento caseiro de café, da colheita à xícara.">
+<meta name="theme-color" content="#F7F2EA">
+<meta name="color-scheme" content="light">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Torra Certa">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:#F7F2EA; --card:#FBF8F3; --ink:#2B1D14; --ink2:#6E5A4B; --ink3:#A08C7C; --line:#E4D9CA;
+  --prep:#B08A68; --crit:#B4452F; --dry:#D9893B; --test:#7A8A3E; --rest:#5E7A8C;
+  --peel:#5A3A26; --roast:#5A3A26; --degas:#A0755A; --cup:#2B1D14;
+  --safe-t:env(safe-area-inset-top); --safe-b:env(safe-area-inset-bottom);
+  --tab-h:58px;
+}
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html, body { background:var(--paper); }
+body {
+  font-family:Inter, -apple-system, sans-serif; color:var(--ink); font-size:15px; line-height:1.4;
+  font-feature-settings:"tnum" 1, "cv11" 1; -webkit-font-smoothing:antialiased;
+  min-height:100dvh; overscroll-behavior-y:none;
+}
+button { font:inherit; color:inherit; background:none; border:0; cursor:pointer; }
+input, textarea { font:inherit; color:inherit; }
+.serif { font-family:Lora, Georgia, serif; }
+.p-prep{--c:var(--prep)} .p-crit{--c:var(--crit)} .p-dry{--c:var(--dry)} .p-test{--c:var(--test)}
+.p-rest{--c:var(--rest)} .p-peel{--c:var(--peel)} .p-roast{--c:var(--roast)} .p-degas{--c:var(--degas)} .p-cup{--c:var(--cup)}
+
+/* ---------- top bar ---------- */
+.top {
+  position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--paper) 88%, transparent);
+  -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+  padding:calc(var(--safe-t) + 10px) 20px 12px; display:flex; align-items:flex-end; justify-content:space-between;
+  border-bottom:1px solid transparent; transition:border-color .2s;
+}
+.top.scrolled { border-bottom-color:var(--line); }
+.eyebrow { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); font-weight:600; }
+.top h1 { font-family:Lora, serif; font-weight:600; font-size:28px; line-height:1.05; letter-spacing:-.01em; margin-top:3px; }
+.top h1 em { font-style:italic; font-weight:500; color:var(--crit); }
+.iconbtn { width:38px; height:38px; border-radius:19px; display:grid; place-items:center; border:1px solid var(--line); background:var(--card); }
+.iconbtn svg { width:19px; height:19px; stroke:var(--ink); }
+
+main { padding:4px 16px calc(var(--tab-h) + var(--safe-b) + 24px); max-width:560px; margin:0 auto; }
+.view { display:none; }
+.view.on { display:block; animation:fade .22s ease; }
+@keyframes fade { from { opacity:0; transform:translateY(4px); } }
+.sec-title { font-family:Lora, serif; font-weight:600; font-size:19px; margin:26px 4px 10px; display:flex; align-items:baseline; justify-content:space-between; }
+.sec-title small { font-family:Inter; font-size:12px; font-weight:500; color:var(--ink3); }
+.card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; }
+.card + .card { margin-top:12px; }
+
+/* ---------- hero ---------- */
+.hero { padding:18px 16px 16px; position:relative; overflow:hidden; }
+.hero::before { content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--c); }
+.hero .when { font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--c); }
+.hero h2 { font-family:Lora, serif; font-weight:600; font-size:25px; line-height:1.1; margin-top:4px; }
+.hero .sub { color:var(--ink2); font-size:13.5px; margin-top:3px; }
+.est { display:inline-block; font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink3); border:1px solid var(--line); border-radius:4px; padding:1px 4px; margin-left:6px; vertical-align:2px; }
+.track { margin-top:18px; }
+.bar { position:relative; height:10px; border-radius:5px; background:var(--line); overflow:hidden; }
+.seg { position:absolute; top:0; bottom:0; background:var(--c); }
+.bar-wrap { position:relative; }
+.todaybar { position:absolute; top:-4px; bottom:-4px; width:0; border-left:2px solid var(--ink); }
+.todaybar::after { content:""; position:absolute; top:-3px; left:-4px; width:6px; height:6px; border-radius:3px; background:var(--ink); }
+.ticks { display:flex; justify-content:space-between; font-size:11px; color:var(--ink3); margin-top:6px; }
+.next { display:flex; align-items:center; gap:12px; line-height:1.35; margin-top:14px; padding-top:14px; border-top:1px solid var(--line); font-size:13.5px; color:var(--ink2); }
+.next b { color:var(--ink); font-weight:600; }
+.next .mk { width:32px; height:32px; flex:none; border-radius:16px; display:grid; place-items:center; background:color-mix(in srgb, var(--c) 16%, var(--card)); color:var(--c); font-size:11px; }
+
+/* ---------- tasks ---------- */
+.tasks { padding:4px 16px; }
+.task { display:flex; align-items:center; gap:12px; padding:13px 0; border-bottom:1px solid var(--line); }
+.task:last-child { border-bottom:0; }
+.task .tl { flex:1; font-size:15px; line-height:1.3; }
+.task .tl small { display:block; font-size:12.5px; color:var(--ink3); margin-top:2px; }
+.task.done .tl { color:var(--ink3); }
+.chk { width:26px; height:26px; flex:none; border-radius:8px; border:1.5px solid var(--ink3); display:grid; place-items:center; transition:all .15s; }
+.chk svg { width:15px; height:15px; stroke:#fff; stroke-width:3; opacity:0; }
+.task.done .chk { background:var(--c, var(--ink)); border-color:var(--c, var(--ink)); }
+.task.done .chk svg { opacity:1; }
+.pips { display:flex; gap:6px; flex:none; }
+.pip { width:22px; height:22px; border-radius:11px; border:1.5px solid var(--ink3); transition:all .15s; }
+.pip.on { background:var(--c, var(--ink)); border-color:var(--c, var(--ink)); }
+.go { flex:none; font-size:13px; font-weight:600; color:var(--c, var(--ink)); padding:6px 10px; border-radius:8px; background:color-mix(in srgb, var(--c, var(--ink)) 12%, var(--card)); }
+.empty { padding:18px 0; color:var(--ink2); font-size:14.5px; }
+
+/* ---------- tests ---------- */
+.test { display:flex; gap:12px; align-items:flex-start; padding:12px 0; border-bottom:1px solid var(--line); }
+.test:last-of-type { border-bottom:0; }
+.tn { width:26px; height:26px; flex:none; border-radius:13px; border:1.5px solid var(--test); color:var(--test); font-size:12px; font-weight:700; display:grid; place-items:center; transition:all .15s; }
+.test.on .tn { background:var(--test); color:#fff; }
+.test b { font-size:15px; font-weight:600; }
+.test p { font-size:13px; color:var(--ink2); margin-top:2px; line-height:1.35; }
+.btn { width:100%; padding:14px; border-radius:12px; background:var(--ink); color:var(--paper); font-weight:600; font-size:15px; margin-top:14px; }
+.btn.ghost { background:transparent; color:var(--ink); border:1px solid var(--line); }
+.btn.green { background:var(--test); }
+.btn:disabled { opacity:.35; }
+.hint { font-size:12.5px; color:var(--ink3); margin-top:8px; text-align:center; }
+
+/* ---------- weight ---------- */
+.wrow { display:flex; gap:10px; align-items:stretch; }
+.field { flex:1; display:flex; align-items:center; border:1px solid var(--line); border-radius:12px; background:#fff; padding:0 14px; }
+.field input { flex:1; width:100%; border:0; outline:0; background:transparent; font-size:22px; font-weight:600; padding:12px 0; }
+.field span { color:var(--ink3); font-size:15px; }
+.wrow .btn { width:auto; margin:0; padding:0 22px; }
+.stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
+.stat { background:var(--paper); border-radius:10px; padding:10px; }
+.stat .k { font-size:11px; color:var(--ink3); font-weight:600; letter-spacing:.04em; text-transform:uppercase; }
+.stat .v { font-size:19px; font-weight:600; margin-top:2px; }
+.badge { display:flex; gap:10px; align-items:center; margin-top:12px; padding:11px 12px; border-radius:10px; font-size:13.5px; background:color-mix(in srgb, var(--test) 13%, var(--card)); color:var(--ink); }
+.badge.warn { background:color-mix(in srgb, var(--dry) 15%, var(--card)); }
+.chart { width:100%; height:auto; display:block; margin-top:6px; }
+.wlist .wi { display:flex; align-items:center; padding:12px 0; border-bottom:1px solid var(--line); font-size:15px; }
+.wlist .wi:last-child { border-bottom:0; }
+.wi .d { width:76px; color:var(--ink2); }
+.wi .g { flex:1; font-weight:600; }
+.wi .pc { width:56px; text-align:right; color:var(--ink2); }
+.wi .dl { width:64px; text-align:right; font-size:14px; color:var(--ink3); }
+.wi .x { width:30px; text-align:right; color:var(--ink3); font-size:18px; }
+
+/* ---------- calendar ---------- */
+.legend { display:flex; flex-wrap:wrap; gap:8px 14px; font-size:12px; color:var(--ink2); margin:4px 4px 0; }
+.lg { display:flex; align-items:center; gap:6px; }
+.sw { width:10px; height:10px; border-radius:3px; background:var(--c); }
+.month { margin-top:22px; }
+.month h3 { font-family:Lora, serif; font-weight:600; font-size:19px; margin:0 4px 8px; }
+.month h3 span { font-family:Inter; font-weight:400; font-size:13px; color:var(--ink3); margin-left:4px; }
+.grid { display:grid; grid-template-columns:repeat(7,1fr); row-gap:5px; }
+.wd { font-size:11px; font-weight:600; color:var(--ink3); padding:0 0 4px 7px; }
+.day { position:relative; display:block; cursor:pointer; height:64px; margin:0 2.5px; border-radius:10px; padding:6px 6px; border:1px solid var(--line); background:var(--card); text-align:left; }
+.day.blank { border:0; background:none; pointer-events:none; }
+.day[data-p] { background:color-mix(in srgb, var(--c) 16%, var(--card)); border-color:color-mix(in srgb, var(--c) 38%, var(--card)); }
+.day.strong { background:color-mix(in srgb, var(--c) 26%, var(--card)); }
+.day.jl { margin-left:-.5px; border-top-left-radius:0; border-bottom-left-radius:0; border-left-color:transparent; }
+.day.jr { margin-right:-.5px; border-top-right-radius:0; border-bottom-right-radius:0; border-right-color:transparent; }
+.day .n { font-size:13px; font-weight:600; display:inline-flex; align-items:center; justify-content:center; min-width:22px; height:22px; margin:-3px 0 0 -3px; border-radius:11px; }
+.day:not([data-p]) .n { color:var(--ink3); font-weight:500; }
+.day.today .n { background:var(--ink); color:var(--paper); }
+.day .mk { position:absolute; top:5px; right:5px; font-size:9px; color:var(--c, var(--ink)); }
+.day .ms { position:absolute; left:5px; right:2px; bottom:5px; font-size:9px; white-space:normal; font-weight:600; line-height:1.1; letter-spacing:-.01em; overflow:hidden; }
+.day .dots { position:absolute; left:6px; bottom:6px; display:flex; gap:3px; }
+.day .dots i { width:5px; height:5px; border-radius:3px; background:var(--ink2); }
+.day:active { transform:scale(.97); }
+
+/* ---------- guide ---------- */
+.gcard { position:relative; padding-left:20px; }
+.gcard::before { content:""; position:absolute; left:0; top:16px; bottom:16px; width:3px; border-radius:2px; background:var(--c); left:12px; }
+.gcard { padding:16px 16px 12px 26px; }
+.gcard .cd { font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--c); }
+.gcard h4 { font-family:Lora, serif; font-size:18px; font-weight:600; margin-top:2px; }
+.gcard .cs { font-size:12.5px; color:var(--ink3); }
+.gcard ul { list-style:none; margin-top:10px; }
+.gcard li { position:relative; font-size:14px; padding:5px 0 5px 16px; line-height:1.35; }
+.gcard li::before { content:""; position:absolute; left:2px; top:12px; width:5px; height:5px; border-radius:3px; background:var(--ink3); }
+.alert { background:color-mix(in srgb, var(--crit) 8%, var(--card)); border-color:color-mix(in srgb, var(--crit) 28%, var(--card)); }
+.alert h4 { font-family:Lora, serif; font-size:18px; color:var(--crit); margin-bottom:6px; }
+.alert p { font-size:14px; padding:6px 0; border-top:1px solid color-mix(in srgb, var(--crit) 18%, var(--card)); }
+.alert p:first-of-type { border-top:0; }
+.alert b { font-weight:600; }
+
+/* ---------- tab bar ---------- */
+.tabs {
+  position:fixed; left:0; right:0; bottom:0; z-index:30; display:flex; justify-content:space-around;
+  padding:6px 8px calc(var(--safe-b) + 4px); height:calc(var(--tab-h) + var(--safe-b));
+  background:color-mix(in srgb, var(--paper) 90%, transparent); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+  border-top:1px solid var(--line);
+}
+.tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10.5px; font-weight:600; color:var(--ink3); padding-top:4px; }
+.tab svg { width:24px; height:24px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.tab.on { color:var(--ink); }
+
+/* ---------- sheet ---------- */
+.scrim { position:fixed; inset:0; z-index:40; background:rgba(43,29,20,.32); opacity:0; pointer-events:none; transition:opacity .25s; }
+.scrim.on { opacity:1; pointer-events:auto; }
+.sheet {
+  position:fixed; left:0; right:0; bottom:0; z-index:41; max-height:88dvh; overflow:auto; -webkit-overflow-scrolling:touch;
+  background:var(--paper); border-radius:20px 20px 0 0; padding:8px 20px calc(var(--safe-b) + 24px);
+  transform:translateY(105%); transition:transform .3s cubic-bezier(.2,.8,.2,1); max-width:560px; margin:0 auto;
+}
+.sheet.on { transform:none; }
+.grab { width:38px; height:5px; border-radius:3px; background:var(--line); margin:0 auto 14px; }
+.sheet h3 { font-family:Lora, serif; font-size:23px; font-weight:600; line-height:1.15; }
+.sheet .shead { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:14px; }
+.chip { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; padding:4px 9px; border-radius:20px; background:color-mix(in srgb, var(--c) 15%, var(--card)); color:var(--ink); margin-top:6px; }
+.close { width:32px; height:32px; border-radius:16px; background:var(--line); display:grid; place-items:center; flex:none; }
+.close svg { width:14px; height:14px; stroke:var(--ink2); stroke-width:2.4; }
+.lbl { font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--ink3); margin:18px 2px 7px; }
+textarea { width:100%; min-height:84px; border:1px solid var(--line); border-radius:12px; background:#fff; padding:12px 14px; font-size:16px; resize:vertical; outline:0; }
+.set { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 0; border-bottom:1px solid var(--line); font-size:15px; }
+.set:last-child { border-bottom:0; }
+.set small { display:block; color:var(--ink3); font-size:12.5px; }
+.set input[type=date], .set input[type=number] { font-size:16px; border:1px solid var(--line); background:#fff; border-radius:9px; padding:7px 9px; min-width:0; max-width:150px; text-align:right; -webkit-appearance:none; appearance:none; }
+.set input[type=number] { width:84px; }
+.stepper { display:flex; align-items:center; border:1px solid var(--line); border-radius:9px; background:#fff; }
+.stepper button { width:34px; height:34px; font-size:18px; color:var(--ink2); }
+.stepper span { min-width:28px; text-align:center; font-weight:600; }
+.danger { color:var(--crit); }
+.toast { position:fixed; left:50%; bottom:calc(var(--tab-h) + var(--safe-b) + 16px); transform:translate(-50%, 20px); z-index:50; background:var(--ink); color:var(--paper); font-size:14px; font-weight:500; padding:10px 16px; border-radius:22px; opacity:0; transition:all .25s; pointer-events:none; white-space:nowrap; }
+.toast.on { opacity:1; transform:translate(-50%, 0); }
+</style>
+</head>
+<body>
+
+<header class="top" id="top">
+  <div>
+    <div class="eyebrow" id="topEyebrow">Café caseiro · lavado</div>
+    <h1>Torra <em>Certa</em></h1>
+  </div>
+  <button class="iconbtn" id="openSettings" aria-label="Ajustes">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+  </button>
+</header>
+
+<main>
+  <section class="view on" id="v-hoje"></section>
+  <section class="view" id="v-cal"></section>
+  <section class="view" id="v-peso"></section>
+  <section class="view" id="v-guia"></section>
+</main>
+
+<nav class="tabs">
+  <button class="tab on" data-v="hoje"><svg viewBox="0 0 24 24"><path d="M5 11a7 7 0 0 0 14 0V9H5z"/><path d="M19 10h1.5a2.5 2.5 0 0 1 0 5H18"/><path d="M8 3c0 1.5 1 1.5 1 3M12 3c0 1.5 1 1.5 1 3M16 3c0 1.5 1 1.5 1 3"/></svg>Hoje</button>
+  <button class="tab" data-v="cal"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Calendário</button>
+  <button class="tab" data-v="peso"><svg viewBox="0 0 24 24"><path d="M6 8h12l2 12H4z"/><circle cx="12" cy="5.5" r="2.2"/><path d="M12 12v3"/></svg>Peso</button>
+  <button class="tab" data-v="guia"><svg viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>Guia</button>
+</nav>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grab"></div><div id="sheetBody"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   Torra Certa — estado, datas e fases
+   ========================================================= */
+const KEY = 'torra-certa.v1';
+const DEFAULTS = {
+  harvest: '2026-10-25',
+  dryStart: '2026-10-26',
+  dryEnd: null,        // data real em que a secagem terminou (null = estimada)
+  estDryDays: 28,      // duração estimada da secagem (dias)
+  restDays: 20,        // dias entre fim da secagem e o descasque
+  washWeight: null,    // peso logo após lavar (g)
+  weights: {},         // { 'YYYY-MM-DD': gramas }
+  checks: {},          // { 'YYYY-MM-DD': { taskId: n } }
+  tests: [false,false,false,false,false],
+  testsDate: null,
+  notes: {}
+};
+let S = load();
+function load() {
+  try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY)) || {}); }
+  catch (e) { return Object.assign({}, DEFAULTS); }
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+
+const pad = n => String(n).padStart(2, '0');
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const add = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return iso(d); };
+const diff = (a, b) => Math.round((parse(b) - parse(a)) / 864e5);
+const today = () => iso(new Date());
+const MES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const SEMANA = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+const fmt = s => { const d = parse(s); return `${pad(d.getDate())}/${pad(d.getMonth()+1)}`; };
+const fmtLong = s => { const d = parse(s); return `${SEMANA[d.getDay()]}, ${d.getDate()} de ${MESES[d.getMonth()].toLowerCase()}`; };
+const fmtShort = s => { const d = parse(s); return `${d.getDate()} ${MES[d.getMonth()]}`; };
+
+function plan() {
+  const ds = S.dryStart;
+  const dryEnd = S.dryEnd || add(ds, S.estDryDays - 1);
+  const est = !S.dryEnd;
+  const peel = add(dryEnd, S.restDays);
+  const roast = add(peel, 1);
+  const cup = add(roast, 5);
+  const clip = e => (e > dryEnd ? dryEnd : e);
+  const raw = [
+    { k:'prep',  l:'Despolpa e fermentação', a:S.harvest,  b:add(ds,-1) },
+    { k:'crit',  l:'Secagem: fase crítica',  a:ds,         b:clip(add(ds,2)) },
+    { k:'dry',   l:'Secagem',                a:add(ds,3),  b:clip(add(ds,13)) },
+    { k:'test',  l:'Testes de ponto',        a:add(ds,14), b:dryEnd, est },
+    { k:'rest',  l:'Descanso no pergaminho', a:add(dryEnd,1), b:add(peel,-1), est },
+    { k:'peel',  l:'Descasque',              a:peel,  b:peel,  est },
+    { k:'roast', l:'Torra',                  a:roast, b:roast, est },
+    { k:'degas', l:'Desgaseificação',        a:add(roast,1), b:add(cup,-1), est },
+    { k:'cup',   l:'Primeiro café',          a:cup,   b:cup,   est },
+  ].filter(p => p.a <= p.b);
+  const ms = [
+    { d:S.harvest,    s:'●', l:'Colheita',  k:'prep' },
+    { d:ds,           s:'●', l:'Secagem',   k:'crit' },
+    { d:add(ds,7),    s:'◆', l:'Pesagem',   k:'dry',  t:'Começar a pesar diariamente' },
+    { d:add(ds,14),   s:'◆', l:'Testes',    k:'test', t:'Começar os testes de ponto' },
+    { d:dryEnd,       s:est ? '◆' : '✓', l:est ? 'Limite' : 'Seco', k:'test', t:est ? 'Limite estimado da secagem' : 'Secagem concluída', est },
+    { d:peel,         s:'◆', l:'Tirar casca', k:'peel', t:'Tirar o pergaminho', est },
+    { d:roast,        s:'◆', l:'Torrar',    k:'roast', t:'Torrar', est },
+    { d:cup,          s:'★', l:'1º café',   k:'cup',  t:'Primeiro café', est },
+  ].filter(m => !((m.l === 'Pesagem' || m.l === 'Testes') && m.d > dryEnd));
+  return { phases:raw, ms, dryEnd, est, peel, roast, cup, start:S.harvest };
+}
+function phaseAt(P, d) { return P.phases.find(p => d >= p.a && d <= p.b) || null; }
+function msAt(P, d) { return P.ms.find(m => m.d === d) || null; }
+function dryDay(d) { return diff(S.dryStart, d) + 1; }
+
+/* ---------- tarefas por dia ---------- */
+function tasksFor(d) {
+  const P = plan(), ph = phaseAt(P, d);
+  if (!ph) return { ph:null, list:[], msg: d < S.harvest ? 'Antes da colheita.' : 'Processo concluído. Bom café!' };
+  const n = dryDay(d), L = [];
+  const turn = c => ({ id:'turn', l:'Revirar os grãos', sub:`${c} vezes ao dia`, count:c });
+  const look = { id:'look', l:'Olhar e cheirar', sub:'Pontos brancos ou verdes, cheiro de mofo' };
+  const weigh = { id:'weigh', l:'Pesar', sub:'Sempre no mesmo horário', weigh:true };
+  switch (ph.k) {
+    case 'prep':
+      L.push({ id:'rub', l:'Teste do atrito', sub:'Áspero e rangendo como cascalho = pronto' });
+      L.push({ id:'water', l:'Trocar a água', sub:'1 a 2 vezes ao dia' });
+      break;
+    case 'crit':
+      L.push(turn(4), look, { id:'fan', l:'Ventilador ligado direto', sub:'24 h por dia nesta fase' });
+      break;
+    case 'dry':
+      if (n < 8) L.push(turn(3), look, { id:'fan', l:'Ventilador contínuo', sub:'Até o dia 7' });
+      else L.push(turn(2), weigh, look);
+      break;
+    case 'test':
+      L.push(turn(2), weigh);
+      if ((n - 15) % 2 === 0 || d === P.dryEnd) L.push({ id:'tests', l:'Testes de ponto', sub:'A cada 2 dias', tests:true });
+      L.push(look);
+      break;
+    case 'rest': {
+      const k = diff(ph.a, d);
+      if (k % 7 === 6) L.push({ id:'week', l:'Checagem semanal', sub:'Cheiro e sinais de mofo no saco' });
+      break; }
+    case 'peel':
+      L.push({ id:'peel', l:'Tirar o pergaminho', sub:'Esfregar entre as mãos ou num pano' },
+             { id:'blow', l:'Soprar as cascas', sub:'Ventilador ou vento leve' },
+             { id:'sort', l:'Separar defeitos', sub:'Grãos pretos, furados ou quebrados' });
+      break;
+    case 'roast':
+      L.push({ id:'roast', l:'Torrar', sub:'Em pequenas quantidades' },
+             { id:'jar', l:'Guardar em pote com tampa', sub:'Depois de esfriar' });
+      break;
+    case 'cup':
+      L.push({ id:'cup', l:'Passar o primeiro café', sub:'Anote como ficou' });
+      break;
+  }
+  const msg = { rest:'Nada a fazer hoje. Deixe descansar em lugar seco e arejado.',
+                degas:'Deixe o gás sair. Ainda não moa o café.' }[ph.k] || '';
+  return { ph, list:L, msg };
+}
+function taskVal(d, t) {
+  if (t.weigh) return S.weights[d] != null ? 1 : 0;
+  if (t.tests) return S.testsDate === d ? 1 : 0;
+  return (S.checks[d] && S.checks[d][t.id]) || 0;
+}
+function setTask(d, id, v) {
+  S.checks[d] = S.checks[d] || {};
+  if (v) S.checks[d][id] = v; else delete S.checks[d][id];
+  if (!Object.keys(S.checks[d]).length) delete S.checks[d];
+  save();
+}
+
+/* ---------- peso ---------- */
+function weightSeries() {
+  return Object.keys(S.weights).sort().map(d => ({ d, g:S.weights[d] }));
+}
+function refWeight() { const w = weightSeries(); return S.washWeight || (w[0] && w[0].g) || null; }
+function stability() {
+  const w = weightSeries(); if (w.length < 3) return null;
+  const [a, b, c] = w.slice(-3);
+  if (diff(a.d, b.d) !== 1 || diff(b.d, c.d) !== 1) return null;
+  const ok = (x, y) => Math.abs(y.g - x.g) / x.g <= 0.01;
+  return ok(a, b) && ok(b, c);
+}
+
+/* =========================================================
+   Render
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const ICON = {
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'
+};
+const sgn = n => (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(Math.round(n * 10) / 10);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function renderTrack(P, t) {
+  const total = diff(P.start, P.cup) + 1, pct = d => diff(P.start, d) / total * 100;
+  const segs = P.phases.map(p => `<div class="seg p-${p.k}" style="left:${pct(p.a)}%;width:${(diff(p.a,p.b)+1)/total*100}%"></div>`).join('');
+  const inRange = t >= P.start && t <= P.cup;
+  const mark = inRange ? `<div class="todaybar" style="left:${pct(t) + 50/total}%"></div>` : '';
+  return `<div class="track"><div class="bar-wrap"><div class="bar">${segs}</div>${mark}</div>
+    <div class="ticks"><span>${fmt(P.start)}</span><span>${fmt(P.dryEnd)}</span><span>${fmt(P.cup)}</span></div></div>`;
+}
+
+function taskRow(d, t, ph) {
+  const v = taskVal(d, t), done = t.count ? v >= t.count : !!v;
+  let ctl;
+  if (t.count) ctl = `<div class="pips">${Array.from({length:t.count}, (_, i) => `<button class="pip ${i < v ? 'on' : ''}" data-act="pip" data-d="${d}" data-id="${t.id}" data-i="${i}" aria-label="Vez ${i+1}"></button>`).join('')}</div>`;
+  else if (t.weigh) ctl = v ? `<span class="go">${S.weights[d]} g</span>` : `<button class="go" data-act="goweigh" data-d="${d}">Pesar</button>`;
+  else if (t.tests) ctl = `<button class="go" data-act="gotests">${v ? 'Feito' : 'Abrir'}</button>`;
+  else ctl = `<button class="chk" data-act="chk" data-d="${d}" data-id="${t.id}" aria-label="Concluir">${ICON.check}</button>`;
+  return `<div class="task ${done ? 'done' : ''} p-${ph.k}"><div class="tl">${t.l}<small>${t.sub || ''}</small></div>${ctl}</div>`;
+}
+
+function renderHoje() {
+  const t = today(), P = plan(), T = tasksFor(t), ph = T.ph;
+  let h = '';
+  if (ph) {
+    const n = dryDay(t);
+    const when = ph.k === 'prep' ? fmtLong(t) : (t <= P.dryEnd ? `Dia ${n} de secagem` : fmtLong(t));
+    const range = ph.a === ph.b ? fmtShort(ph.a) : `${fmtShort(ph.a)} – ${fmtShort(ph.b)}`;
+    const nx = P.ms.find(m => m.d > t);
+    const left = nx ? diff(t, nx.d) : 0;
+    h += `<div class="card hero p-${ph.k}">
+      <div class="when">${when}</div>
+      <h2>${ph.l}${ph.est ? '<span class="est">est.</span>' : ''}</h2>
+      <div class="sub">${range}${ph.k !== 'prep' && t <= P.dryEnd ? ` · ${fmtLong(t)}` : ''}</div>
+      ${renderTrack(P, t)}
+      ${nx ? `<div class="next p-${nx.k}"><span class="mk">${nx.s}</span><span><b>${nx.t || nx.l}</b><br>${left === 1 ? 'Amanhã' : `Em ${left} dias`} · ${fmtShort(nx.d)}${nx.est ? ' (est.)' : ''}</span></div>` : ''}
+    </div>`;
+  } else {
+    h += `<div class="card hero p-cup"><div class="when">${fmtLong(t)}</div><h2>${T.msg}</h2>${renderTrack(P, t)}</div>`;
+  }
+
+  if (ph) {
+    h += `<div class="sec-title">Hoje<small>${T.list.length ? `${T.list.filter(x => { const v = taskVal(t, x); return x.count ? v >= x.count : v; }).length} de ${T.list.length}` : ''}</small></div>`;
+    h += `<div class="card tasks">${T.list.length ? T.list.map(x => taskRow(t, x, ph)).join('') : `<div class="empty">${T.msg}</div>`}</div>`;
+  }
+
+  const showWeigh = ph && (ph.k === 'dry' || ph.k === 'test' || ph.k === 'crit');
+  if (showWeigh) h += weighCard(t, ph.k === 'crit' || dryDay(t) < 8);
+
+  if (ph && (ph.k === 'test' || (ph.k === 'dry' && dryDay(t) >= 8))) h += testsCard(P);
+
+  h += `<div class="sec-title">Atenção</div>${alertCard()}`;
+  $('#v-hoje').innerHTML = h;
+  $('#topEyebrow').textContent = ph ? `Café caseiro · ${ph.l.split(':')[0].toLowerCase()}` : 'Café caseiro · lavado';
+}
+
+function weighCard(d, optional) {
+  const ref = refWeight(), g = S.weights[d];
+  return `<div class="sec-title">Peso${optional ? '<small>opcional até o dia 8</small>' : ''}</div>
+  <div class="card">
+    <div class="wrow"><label class="field"><input id="wIn" type="number" inputmode="decimal" placeholder="${g != null ? g : '0'}" value="${g != null ? g : ''}"><span>g</span></label>
+    <button class="btn" data-act="saveweigh" data-d="${d}">${g != null ? 'Atualizar' : 'Salvar'}</button></div>
+    ${ref && g != null ? `<div class="hint">${Math.round(g / ref * 100)}% do peso de referência (${ref} g) · meta ≈ 50%</div>` : ''}
+  </div>`;
+}
+
+const TESTS = [
+  ['Peso estável', 'Parou de perder peso por 2 dias seguidos, perto de 50% do peso pós-lavagem'],
+  ['Pergaminho', 'Quebradiço, estala e solta fácil entre os dedos'],
+  ['Som', 'Sacudido num pote, barulho de pedrinha, não abafado'],
+  ['Mordida', 'Grão descascado duro, quebra seco, o dente não marca'],
+  ['Pote fechado', '24 h num pote de vidro sem vapor ou gotinhas na parede'],
+];
+function testsCard(P) {
+  const st = stability(), all = S.tests.every(Boolean);
+  return `<div class="sec-title" id="testsAnchor">Está seco?<small>${S.testsDate ? `último teste ${fmt(S.testsDate)}` : 'pare quando os 5 baterem'}</small></div>
+  <div class="card p-test">
+    ${TESTS.map(([a, b], i) => `<button class="test ${S.tests[i] ? 'on' : ''}" data-act="test" data-i="${i}" style="width:100%;text-align:left"><span class="tn">${i+1}</span><span><b>${a}</b><p>${b}${i === 0 && st ? ' · <b style="color:var(--test);font-size:13px">o peso estabilizou</b>' : ''}</p></span></button>`).join('')}
+    ${S.dryEnd ? `<div class="badge">✓ Secagem concluída em ${fmt(S.dryEnd)}.</div><button class="btn ghost" data-act="undodry">Desfazer</button>`
+      : `<button class="btn green" data-act="finishdry" ${all ? '' : 'disabled'}>Concluir secagem hoje</button>
+         <div class="hint">${all ? 'Isso recalcula descanso, descasque e torra.' : `${S.tests.filter(Boolean).length} de 5 testes ok`}</div>`}
+  </div>`;
+}
+
+function alertCard() {
+  return `<div class="card alert"><h4>Sinais de alerta</h4>
+    <p><b>Mofo branco, verde ou preto:</b> separe os grãos afetados e aumente a ventilação.</p>
+    <p><b>Cheiro de vinagre forte ou podre:</b> algo fermentou demais.</p>
+    <p><b>Grão esbranquiçado e farelento:</b> secou demais.</p>
+    <p><b>Calor:</b> nunca acima de 40 °C. Longe de banheiro e cozinha.</p></div>`;
+}
+
+/* ---------- calendário ---------- */
+function renderCal() {
+  const P = plan(), t = today();
+  const keys = [...new Set(P.phases.map(p => p.k))];
+  const LBL = { prep:'Despolpa', crit:'Fase crítica', dry:'Secagem', test:'Testes', rest:'Descanso', peel:'Descasque', roast:'Torra', degas:'Desgaseificação', cup:'1º café' };
+  let h = `<div class="legend">${keys.map(k => `<span class="lg p-${k}"><i class="sw"></i>${LBL[k]}</span>`).join('')}</div>`;
+  const s = parse(P.start), e = parse(P.cup);
+  for (let y = s.getFullYear(), m = s.getMonth(); y < e.getFullYear() || (y === e.getFullYear() && m <= e.getMonth()); m === 11 ? (y++, m = 0) : m++) {
+    const first = new Date(y, m, 1), days = new Date(y, m + 1, 0).getDate();
+    let cells = ['D','S','T','Q','Q','S','S'].map(x => `<div class="wd">${x}</div>`).join('');
+    for (let i = 0; i < first.getDay(); i++) cells += '<div class="day blank"></div>';
+    for (let dd = 1; dd <= days; dd++) {
+      const d = iso(new Date(y, m, dd)), wd = new Date(y, m, dd).getDay();
+      const ph = phaseAt(P, d), ms = msAt(P, d);
+      const prev = dd > 1 && wd !== 0 ? phaseAt(P, add(d, -1)) : null;
+      const next = dd < days && wd !== 6 ? phaseAt(P, add(d, 1)) : null;
+      const cls = ['day'];
+      if (ph) { cls.push('p-' + ph.k); if (['crit','peel','roast','cup'].includes(ph.k)) cls.push('strong'); }
+      if (ph && prev === ph) cls.push('jl');
+      if (ph && next === ph) cls.push('jr');
+      if (d === t) cls.push('today');
+      const logged = (S.weights[d] != null) || (S.notes[d]) || (S.checks[d]);
+      const dots = !ms && logged ? `<span class="dots">${S.weights[d] != null ? '<i></i>' : ''}${S.notes[d] ? '<i></i>' : ''}${S.checks[d] && S.weights[d] == null && !S.notes[d] ? '<i></i>' : ''}</span>` : '';
+      cells += `<div class="${cls.join(' ')}" role="button" tabindex="0" aria-label="${fmtLong(d)}" ${ph ? `data-p="${ph.k}"` : ''} data-act="day" data-d="${d}">
+        <span class="n">${dd}</span>${ms ? `<span class="mk p-${ms.k}">${ms.s}</span><span class="ms">${ms.l}</span>` : ''}${dots}</div>`;
+    }
+    h += `<div class="month"><h3>${MESES[m]}<span>${y}</span></h3><div class="grid">${cells}</div></div>`;
+  }
+  h += `<div class="hint" style="margin-top:18px">Toque num dia para ver tarefas, peso e anotações.${P.est ? ' Datas após os testes são estimadas.' : ''}</div>`;
+  $('#v-cal').innerHTML = h;
+}
+
+/* ---------- peso ---------- */
+function renderPeso() {
+  const t = today(), w = weightSeries(), ref = refWeight(), st = stability();
+  let h = '';
+  h += `<div class="sec-title">Pesar hoje<small>${fmtShort(t)}</small></div>`;
+  h += `<div class="card"><div class="wrow"><label class="field"><input id="wIn" type="number" inputmode="decimal" placeholder="0" value="${S.weights[t] ?? ''}"><span>g</span></label>
+        <button class="btn" data-act="saveweigh" data-d="${t}">${S.weights[t] != null ? 'Atualizar' : 'Salvar'}</button></div>`;
+  if (w.length) {
+    const last = w[w.length - 1], prev = w[w.length - 2];
+    h += `<div class="stats">
+      <div class="stat"><div class="k">Atual</div><div class="v">${last.g} g</div></div>
+      <div class="stat"><div class="k">Da ref.</div><div class="v">${ref ? Math.round(last.g / ref * 100) + '%' : '–'}</div></div>
+      <div class="stat"><div class="k">Últ. dia</div><div class="v">${prev ? sgn(last.g - prev.g) + ' g' : '–'}</div></div></div>`;
+    if (st) h += `<div class="badge">● Peso estável há 2 dias. Faça os testes de ponto.</div>`;
+    else if (ref && last.g / ref <= 0.5) h += `<div class="badge warn">● Chegou perto de 50%. Fique de olho na estabilidade.</div>`;
+  }
+  h += `</div>`;
+
+  h += `<div class="sec-title">Referência</div><div class="card">
+    <div class="set" style="padding-top:0"><span>Peso pós-lavagem<small>${S.washWeight ? 'Meta ≈ ' + Math.round(S.washWeight / 2) + ' g' : (w.length ? `Sem valor: usando o 1º registro (${w[0].g} g)` : 'Se não pesou, o 1º registro vira referência')}</small></span>
+    <input type="number" inputmode="decimal" id="washIn" value="${S.washWeight ?? ''}" placeholder="g"></div></div>`;
+
+  if (w.length >= 2) h += `<div class="sec-title">Curva</div><div class="card">${chart(w, ref)}</div>`;
+
+  if (w.length) {
+    h += `<div class="sec-title">Registros<small>${w.length}</small></div><div class="card wlist" style="padding:4px 16px">`;
+    [...w].reverse().forEach((x, i, arr) => {
+      const p = arr[i + 1];
+      h += `<div class="wi"><span class="d">${fmt(x.d)}</span><span class="g">${x.g} g</span><span class="pc">${ref ? Math.round(x.g / ref * 100) + '%' : ''}</span><span class="dl">${p ? sgn(x.g - p.g) : ''}</span><button class="x" data-act="delweigh" data-d="${x.d}" aria-label="Apagar">×</button></div>`;
+    });
+    h += `</div>`;
+  } else {
+    h += `<div class="hint" style="margin-top:20px">Nenhum registro ainda. A pesagem diária começa em ${fmt(add(S.dryStart, 7))}.</div>`;
+  }
+  $('#v-peso').innerHTML = h;
+}
+function chart(w, ref) {
+  const W = 340, H = 170, L = 34, R = 8, T = 10, B = 22;
+  const d0 = w[0].d, dN = w[w.length - 1].d, span = Math.max(diff(d0, dN), 1);
+  const gs = w.map(x => x.g), target = ref ? ref / 2 : null;
+  let lo = Math.min(...gs, target ?? Infinity), hi = Math.max(...gs, ref ?? 0);
+  const padv = (hi - lo) * .08 || 10; lo -= padv; hi += padv;
+  const X = d => L + diff(d0, d) / span * (W - L - R), Y = g => T + (hi - g) / (hi - lo) * (H - T - B);
+  const pts = w.map(x => `${X(x.d).toFixed(1)},${Y(x.g).toFixed(1)}`).join(' ');
+  const ticks = [hi - padv, (hi + lo) / 2, lo + padv].map(v => Math.round(v));
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" font-family="Inter" font-size="10">
+    ${ticks.map(v => `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="#E4D9CA"/><text x="${L - 6}" y="${Y(v) + 3.5}" text-anchor="end" fill="#A08C7C">${v}</text>`).join('')}
+    ${target ? `<line x1="${L}" x2="${W - R}" y1="${Y(target)}" y2="${Y(target)}" stroke="#7A8A3E" stroke-dasharray="4 4"/><text x="${L + 4}" y="${Y(target) + 13}" fill="#7A8A3E" font-weight="600">meta 50%</text>` : ''}
+    <polyline points="${pts}" fill="none" stroke="#D9893B" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${w.map(x => `<circle cx="${X(x.d)}" cy="${Y(x.g)}" r="3.2" fill="#FBF8F3" stroke="#D9893B" stroke-width="2"/>`).join('')}
+    <text x="${L}" y="${H - 5}" fill="#A08C7C">${fmt(d0)}</text><text x="${W - R}" y="${H - 5}" text-anchor="end" fill="#A08C7C">${fmt(dN)}</text>
+  </svg>`;
+}
+
+/* ---------- guia ---------- */
+function renderGuia() {
+  const P = plan(), ds = S.dryStart;
+  const G = [
+    ['crit', `${fmtShort(ds)} – ${fmtShort(add(ds,2))}`, 'Secagem: fase crítica', 'Dias 1 a 3', ['Ventilador soprando direto, 24 h por dia','Revirar 3 a 4 vezes ao dia','Olhar e cheirar todo dia: pontos brancos ou verdes, cheiro de mofo','Camada única, ar passando por baixo da tela']],
+    ['dry', `${fmtShort(add(ds,3))} – ${fmtShort(add(ds,13))}`, 'Secagem', 'Dias 4 a 14', ['Ventilador contínuo até o dia 7, revirar 2 a 3 vezes ao dia','O pergaminho clareia e fica seco ao toque','A partir do dia 8: pode desligar o ventilador à noite','A partir do dia 8: pesar todo dia, no mesmo horário']],
+    ['test', `${fmtShort(add(ds,14))} – ${fmtShort(P.dryEnd)}`, 'Testes de ponto', 'Dia 15 em diante', ['Continuar pesando e revirando 1 a 2 vezes ao dia','Fazer os 5 testes de ponto a cada 2 dias','Passou em todos: concluir a secagem no app','Não passar do ponto: grão esbranquiçado perde sabor']],
+    ['rest', `${S.restDays} dias`, 'Descanso', `${fmtShort(add(P.dryEnd,1))} – ${fmtShort(add(P.peel,-1))}`, ['Guardar com o pergaminho, em saco de pano ou papel','Lugar seco, arejado e sem sol','Conferir cheiro e mofo uma vez por semana']],
+    ['peel', `${fmtShort(P.peel)} – ${fmtShort(P.roast)}`, 'Descasque e torra', P.est ? 'Datas estimadas' : '', ['Esfregar entre as mãos ou num pano para tirar o pergaminho','Soprar as cascas e separar grãos pretos, furados ou quebrados','Torrar no dia seguinte, em pequenas quantidades']],
+    ['degas', `${fmtShort(add(P.roast,1))} – ${fmtShort(add(P.cup,-1))}`, 'Desgaseificação', '2 a 5 dias', ['Guardar o café torrado em pote com tampa','Esperar o gás sair antes de moer: é aí que o sabor aparece',`Primeiro café por volta de ${fmt(P.cup)}`]],
+  ];
+  let h = `<div class="sec-title">Etapas</div>`;
+  h += G.map(([k, d, t, s, items]) => `<div class="card gcard p-${k}"><div class="cd">${d}</div><h4>${t}</h4>${s ? `<div class="cs">${s}</div>` : ''}<ul>${items.map(x => `<li>${x}</li>`).join('')}</ul></div>`).join('');
+  h += `<div class="sec-title">Os 5 testes de ponto</div><div class="card" style="padding:4px 16px">${TESTS.map(([a, b], i) => `<div class="test"><span class="tn">${i+1}</span><span><b>${a}</b><p>${b}</p></span></div>`).join('')}</div>`;
+  h += `<div class="sec-title">Atenção</div>${alertCard()}`;
+  h += `<div class="hint" style="margin:20px 0 4px">Rendimento esperado: 150 a 200 g de café verde por kg de cereja.</div>`;
+  $('#v-guia').innerHTML = h;
+}
+
+/* ---------- sheets ---------- */
+function openSheet(html) { $('#sheetBody').innerHTML = html; $('#sheet').scrollTop = 0; $('#sheet').classList.add('on'); $('#scrim').classList.add('on'); }
+function closeSheet() { $('#sheet').classList.remove('on'); $('#scrim').classList.remove('on'); renderAll(); }
+const closeBtn = `<button class="close" data-act="close" aria-label="Fechar">${ICON.x}</button>`;
+
+function daySheet(d) {
+  const P = plan(), T = tasksFor(d), ph = T.ph, ms = msAt(P, d);
+  let h = `<div class="shead"><div><h3>${fmtLong(d)[0].toUpperCase() + fmtLong(d).slice(1)}</h3>
+    ${ph ? `<span class="chip p-${ph.k}"><i class="sw"></i>${ph.l}${ph.est ? ' · est.' : ''}</span>` : ''}
+    ${ms && ms.t ? `<span class="chip p-${ms.k}">${ms.s} ${ms.t}</span>` : ''}</div>${closeBtn}</div>`;
+  if (ph && T.list.length) h += `<div class="lbl">Tarefas</div><div class="card tasks" id="sheetTasks">${T.list.map(x => taskRow(d, x, ph)).join('')}</div>`;
+  else if (T.msg) h += `<div class="card" style="color:var(--ink2);font-size:14.5px">${T.msg}</div>`;
+  if (ph && ['crit','dry','test'].includes(ph.k)) {
+    h += `<div class="lbl">Peso</div><div class="wrow"><label class="field"><input id="wIn" type="number" inputmode="decimal" placeholder="0" value="${S.weights[d] ?? ''}"><span>g</span></label>
+      <button class="btn" data-act="saveweigh" data-d="${d}">Salvar</button></div>`;
+  }
+  h += `<div class="lbl">Anotações</div><textarea id="noteIn" data-d="${d}" placeholder="Cheiro, aparência, umidade do dia…">${esc(S.notes[d] || '')}</textarea>`;
+  openSheet(h);
+}
+
+function settingsSheet() {
+  const P = plan();
+  openSheet(`<div class="shead"><h3>Ajustes</h3>${closeBtn}</div>
+  <div class="lbl">Datas</div><div class="card" style="padding:2px 16px">
+    <div class="set"><span>Colheita</span><input type="date" data-set="harvest" value="${S.harvest}"></div>
+    <div class="set"><span>Início da secagem</span><input type="date" data-set="dryStart" value="${S.dryStart}"></div>
+    <div class="set"><span>Fim da secagem<small>${S.dryEnd ? 'Real' : 'Vazio = estimado (' + fmt(P.dryEnd) + ')'}</small></span><input type="date" data-set="dryEnd" value="${S.dryEnd || ''}"></div>
+  </div>
+  <div class="lbl">Durações</div><div class="card" style="padding:2px 16px">
+    <div class="set"><span>Secagem estimada<small>Usada enquanto não houver fim real</small></span><div class="stepper"><button data-act="step" data-k="estDryDays" data-v="-1">−</button><span>${S.estDryDays}</span><button data-act="step" data-k="estDryDays" data-v="1">+</button></div></div>
+    <div class="set"><span>Descanso<small>Dias até o descasque</small></span><div class="stepper"><button data-act="step" data-k="restDays" data-v="-1">−</button><span>${S.restDays}</span><button data-act="step" data-k="restDays" data-v="1">+</button></div></div>
+  </div>
+  <div class="lbl">Previsão</div><div class="card" style="padding:2px 16px">
+    <div class="set"><span>Tirar casca</span><b>${fmt(P.peel)}</b></div>
+    <div class="set"><span>Torrar</span><b>${fmt(P.roast)}</b></div>
+    <div class="set"><span>Primeiro café</span><b>${fmt(P.cup)}</b></div>
+  </div>
+  <div class="hint">Os lembretes do Google Agenda não mudam sozinhos quando as datas mudam aqui.</div>
+  <div class="lbl">Dados</div><div class="card" style="padding:2px 16px">
+    <div class="set"><span>Copiar backup<small>Dados ficam só neste aparelho</small></span><button class="go" data-act="export">Copiar</button></div>
+    <div class="set"><span>Restaurar backup</span><button class="go" data-act="import">Colar</button></div>
+    <div class="set"><span class="danger">Apagar tudo</span><button class="go p-crit" data-act="reset">Apagar</button></div>
+  </div>`);
+}
+
+/* ---------- interações ---------- */
+let toastT;
+function toast(m) { const el = $('#toast'); el.textContent = m; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 1800); }
+function inSheet(el) { return !!el.closest('#sheet'); }
+
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act, d = b.dataset.d, sheet = inSheet(b);
+  const rerender = () => { if (sheet) { const dd = $('#noteIn')?.dataset.d; if (dd) daySheet(dd); } renderAll(); };
+  switch (a) {
+    case 'chk': setTask(d, b.dataset.id, taskVal(d, { id:b.dataset.id }) ? 0 : 1); rerender(); break;
+    case 'pip': { const cur = taskVal(d, { id:b.dataset.id }), i = +b.dataset.i; setTask(d, b.dataset.id, cur === i + 1 ? i : i + 1); rerender(); break; }
+    case 'goweigh': if (sheet) { $('#sheetBody #wIn')?.focus(); } else { const el = $('#wIn'); el?.scrollIntoView({ behavior:'smooth', block:'center' }); setTimeout(() => el?.focus(), 350); } break;
+    case 'gotests': $('#testsAnchor')?.scrollIntoView({ behavior:'smooth', block:'start' }); break;
+    case 'saveweigh': {
+      const v = parseFloat((b.closest('.wrow, .card, #sheetBody').querySelector('#wIn') || {}).value);
+      if (!(v > 0)) { toast('Digite o peso em gramas'); break; }
+      S.weights[d] = Math.round(v * 10) / 10; save(); toast(`${S.weights[d]} g em ${fmt(d)}`); rerender(); break; }
+    case 'delweigh': if (confirm(`Apagar o peso de ${fmt(d)}?`)) { delete S.weights[d]; save(); renderAll(); } break;
+    case 'test': S.tests[+b.dataset.i] = !S.tests[+b.dataset.i]; S.testsDate = today(); save(); renderAll(); break;
+    case 'finishdry': S.dryEnd = today(); save(); toast('Secagem concluída. Datas recalculadas.'); renderAll(); break;
+    case 'undodry': S.dryEnd = null; save(); renderAll(); break;
+    case 'day': daySheet(d); break;
+    case 'close': closeSheet(); break;
+    case 'step': { const k = b.dataset.k; S[k] = Math.max(k === 'restDays' ? 7 : 14, Math.min(45, S[k] + +b.dataset.v)); save(); settingsSheet(); renderAll(); break; }
+    case 'export': try { await navigator.clipboard.writeText(JSON.stringify(S)); toast('Backup copiado'); } catch (_) { prompt('Copie o backup:', JSON.stringify(S)); } break;
+    case 'import': { const txt = prompt('Cole o backup:'); if (!txt) break; try { S = Object.assign({}, DEFAULTS, JSON.parse(txt)); save(); toast('Backup restaurado'); settingsSheet(); renderAll(); } catch (_) { toast('Backup inválido'); } break; }
+    case 'reset': if (confirm('Apagar todos os registros e voltar às datas padrão?')) { S = Object.assign({}, DEFAULTS, { weights:{}, checks:{}, notes:{}, tests:[false,false,false,false,false] }); save(); closeSheet(); toast('Tudo apagado'); } break;
+  }
+});
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.dataset.set) { S[el.dataset.set] = el.value || (el.dataset.set === 'dryEnd' ? null : S[el.dataset.set]); save(); settingsSheet(); renderAll(); }
+  if (el.id === 'washIn') { const v = parseFloat(el.value); S.washWeight = v > 0 ? v : null; save(); renderPeso(); }
+});
+document.addEventListener('input', e => {
+  if (e.target.id === 'noteIn') { const d = e.target.dataset.d, v = e.target.value.trim(); if (v) S.notes[d] = e.target.value; else delete S.notes[d]; save(); }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'wIn') e.target.closest('.wrow')?.querySelector('[data-act=saveweigh]')?.click(); });
+$('#scrim').addEventListener('click', closeSheet);
+$('#openSettings').addEventListener('click', settingsSheet);
+
+// swipe down para fechar a sheet
+(() => { const sh = $('#sheet'); let y0 = null, dy = 0;
+  sh.addEventListener('touchstart', e => { if (sh.scrollTop <= 0) { y0 = e.touches[0].clientY; dy = 0; sh.style.transition = 'none'; } }, { passive:true });
+  sh.addEventListener('touchmove', e => { if (y0 == null) return; dy = Math.max(0, e.touches[0].clientY - y0); if (dy > 0) sh.style.transform = `translateY(${dy}px)`; }, { passive:true });
+  sh.addEventListener('touchend', () => { if (y0 == null) return; sh.style.transition = ''; sh.style.transform = ''; if (dy > 110) closeSheet(); y0 = null; });
+})();
+
+// tabs
+let view = 'hoje';
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  view = t.dataset.v;
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x === t));
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + view));
+  window.scrollTo({ top:0 });
+}));
+window.addEventListener('scroll', () => $('#top').classList.toggle('scrolled', scrollY > 4), { passive:true });
+
+function renderAll() {
+  const y = scrollY;
+  renderHoje(); renderCal(); renderPeso(); renderGuia();
+  window.scrollTo(0, y);
+}
+let lastDay = today();
+document.addEventListener('visibilitychange', () => { if (!document.hidden && today() !== lastDay) { lastDay = today(); renderAll(); } });
+renderAll();
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
