@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Torra Certa</title>
 <meta name="description" content="Acompanhe o processamento caseiro de café, da colheita à xícara.">
 <meta name="theme-color" content="#F7F2EA" media="(prefers-color-scheme: light)">
@@ -47,6 +47,9 @@
 }
 * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
 html, body { background:var(--paper); }
+/* sem zoom: só rolagem (bloqueia pinça e toque duplo) */
+html, body { touch-action:pan-x pan-y; -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+button, [role=button], input, textarea, label { touch-action:manipulation; }
 body {
   font-family:Inter, -apple-system, sans-serif; color:var(--ink); font-size:15px; line-height:1.4;
   font-feature-settings:"tnum" 1, "cv11" 1; -webkit-font-smoothing:antialiased;
@@ -1020,6 +1023,22 @@ document.addEventListener('keydown', e => {
   if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.day[role=button]')) { e.preventDefault(); e.target.click(); }
 });
 $('#scrim').addEventListener('click', closeSheet);
+
+// sem zoom: bloqueia gesto de pinça (Safari) e toque duplo
+['gesturestart', 'gesturechange', 'gestureend'].forEach(ev => document.addEventListener(ev, e => e.preventDefault(), { passive:false }));
+document.addEventListener('touchmove', e => { if (e.touches.length > 1 || (e.scale && e.scale !== 1)) e.preventDefault(); }, { passive:false });
+let lastTouch = 0, tx = 0, ty = 0, moved = false;
+document.addEventListener('touchstart', e => { const t = e.touches[0]; tx = t.clientX; ty = t.clientY; moved = false; }, { passive:true });
+document.addEventListener('touchmove', e => { const t = e.touches[0]; if (Math.abs(t.clientX - tx) > 8 || Math.abs(t.clientY - ty) > 8) moved = true; }, { passive:true });
+document.addEventListener('touchend', e => {
+  const now = Date.now();
+  if (!moved && now - lastTouch < 350 && e.changedTouches.length === 1 && !e.target.closest('input, textarea, select')) {
+    e.preventDefault(); // impede o zoom do toque duplo, mas mantém o toque funcionando
+    e.target.closest('[data-act], .tab, label')?.click();
+  }
+  lastTouch = moved ? 0 : now;
+}, { passive:false });
+document.addEventListener('dblclick', e => e.preventDefault(), { passive:false });
 
 // arrastar para baixo fecha a sheet
 (() => { const sh = $('#sheet'); let y0 = null, dy = 0;
