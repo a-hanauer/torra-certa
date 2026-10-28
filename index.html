@@ -13,6 +13,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Torra Certa">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="roast.css">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -352,6 +353,7 @@ textarea { width:100%; min-height:84px; border:1px solid var(--line); border-rad
   <section class="view on" id="v-hoje"></section>
   <section class="view" id="v-cal"></section>
   <section class="view" id="v-peso"></section>
+  <section class="view" id="v-torra"></section>
   <section class="view" id="v-guia"></section>
 </main>
 
@@ -359,6 +361,7 @@ textarea { width:100%; min-height:84px; border:1px solid var(--line); border-rad
   <button class="tab on" data-v="hoje"><svg viewBox="0 0 24 24"><path d="M5 11a7 7 0 0 0 14 0V9H5z"/><path d="M19 10h1.5a2.5 2.5 0 0 1 0 5H18"/><path d="M8 3c0 1.5 1 1.5 1 3M12 3c0 1.5 1 1.5 1 3M16 3c0 1.5 1 1.5 1 3"/></svg>Hoje</button>
   <button class="tab" data-v="cal"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Calendário</button>
   <button class="tab" data-v="peso"><svg viewBox="0 0 24 24"><path d="M6 8h12l2 12H4z"/><circle cx="12" cy="5.5" r="2.2"/><path d="M12 12v3"/></svg>Peso</button>
+  <button class="tab" data-v="torra"><svg viewBox="0 0 24 24"><path d="M12 21c-3.9 0-7-2.7-7-6.5 0-3.2 2.2-5 3.6-7.2.4 1.7 1.3 2.8 2.4 3.4C11 7.5 12.6 5 15 3c.2 3 1.4 4.6 2.6 6.3C18.6 10.8 19 12.4 19 14.5c0 3.8-3.1 6.5-7 6.5z"/><path d="M12 21c-1.7 0-3-1.2-3-2.9 0-1.6 1.3-2.6 2-4.1.8 1 1.4 1.4 2.1 1.8.6-.8 1-1.5 1.2-2.6.9 1.2 1.7 2.6 1.7 4.6 0 1.9-1.6 3.2-4 3.2z"/></svg>Torra</button>
   <button class="tab" data-v="guia"><svg viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>Guia</button>
 </nav>
 
@@ -532,17 +535,22 @@ function tasksFor(L, d) {
         { id:'blow', l:'Soprar as cascas', sub:'Ventilador ou vento leve' },
         { id:'sort', l:'Separar defeitos', sub:'Grãos pretos, furados ou quebrados' });
       break;
-    case 'roast':
-      list.push({ id:'roast', l:'Torrar', sub:'Em pequenas quantidades, em local ventilado' },
-                { id:'cool', l:'Esfriar rápido', sub:'Peneira e ventilador, mexendo' },
+    case 'roast': {
+      const done = (DB.sessions || []).some(x => x.lotId === L.id && x.batches.length);
+      list.push({ id:'roast', l:'Torrar', sub: done ? 'Torra registrada' : 'A torra guiada cuida do tempo, do resfriamento e do registro', roastGo:true, done },
                 { id:'jar', l:'Guardar em pote com tampa', sub:'Depois de esfriar' });
-      break;
+      break; }
     case 'degas': msg = 'Deixe o gás sair. Ainda não moa o café.'; break;
-    case 'done': list.push({ id:'cup', l:'Passar o primeiro café', sub:'Anote como ficou' }); break;
+    case 'done': {
+      const S = (DB.sessions || []).filter(x => x.lotId === L.id && x.batches.length).pop();
+      list.push({ id:'cup', l:'Passar o primeiro café', sub:'Moa na hora de passar' });
+      if (S) list.push({ id:'taste', l:'Avaliar a torra', sub: S.tasting ? `Nota ${S.tasting.geral}/5` : 'Aroma, doçura, acidez, corpo…', tasteId:S.id, done:!!S.tasting });
+      break; }
   }
   return { s, n, list, msg };
 }
 function taskVal(L, d, t) {
+  if (t.roastGo || t.tasteId) return t.done ? 1 : 0;
   if (t.weigh) return L.weights[d] != null ? 1 : 0;
   if (t.tests) return L.testsDate === d ? 1 : 0;
   return (L.checks[d] && L.checks[d][t.id]) || 0;
@@ -581,7 +589,8 @@ function signsFor(L, k, d) {
     case 'dry': return testsFor(L).map(([a, b]) => S(a, b));
     case 'rest': return [A(`${Math.min(n, e)} de ${e} dias de descanso`, 'O ideal é de 3 a 4 semanas', n >= e), S('Cheiro limpo', 'Sem mofo nem cheiro de umidade no saco')];
     case 'peel': return [S('Sem casca', L.method === 'natural' ? 'Casca seca e pergaminho removidos' : 'Pergaminho removido'), S('Cascas sopradas', 'Só o café verde na peneira'), S('Defeitos separados', 'Grãos pretos, furados ou quebrados fora')];
-    case 'roast': return [S('Cor uniforme', 'No ponto escolhido, sem grãos crus'), S('Grãos frios', 'Esfriados rápido na peneira'), S('Guardados com tampa', 'Pote fechado, longe da luz')];
+    case 'roast': { const done = (DB.sessions || []).some(x => x.lotId === L.id && x.batches.length);
+      return [A('Torra registrada', 'Pela torra guiada, com tempos e perda', done), S('Cor uniforme', 'No ponto escolhido, sem grãos crus'), S('Guardados com tampa', 'Depois de frios, em pote fechado')]; }
     case 'degas': return [A(`${Math.min(n, 5)} de 2 a 5 dias desde a torra`, 'O gás precisa sair antes de moer', n >= 2)];
     default: return [];
   }
@@ -628,6 +637,8 @@ function taskRow(L, d, t, k) {
     ctl = `<span class="winline"><input class="wIn" type="number" inputmode="decimal" placeholder="g" value="${g ?? ''}" aria-label="Peso em gramas"><button class="go" data-act="saveweigh" data-d="${d}">${g != null ? 'ok' : 'Salvar'}</button></span>`;
   }
   else if (t.tests) ctl = `<button class="go" data-act="gotests">${v ? 'Feito' : 'Ver'}</button>`;
+  else if (t.roastGo) ctl = `<button class="go" data-r="newlot" data-lot="${L.id}">${t.done ? 'Nova' : 'Iniciar'}</button>`;
+  else if (t.tasteId) ctl = `<button class="go" data-r="taste" data-id="${t.tasteId}">${t.done ? 'Ver' : 'Avaliar'}</button>`;
   else ctl = `<button class="chk" data-act="chk" data-d="${d}" data-id="${t.id}" aria-label="Concluir">${ICON.check}</button>`;
   return `<div class="task ${done ? 'done' : ''} p-${k}"><div class="tl">${t.l}<small>${subl}</small></div>${ctl}</div>`;
 }
@@ -831,8 +842,8 @@ const GUIDE = {
 };
 let guideMethod = null;
 function renderGuia() {
-  const L = lot(); if (!L) return;
-  const m = guideMethod || L.method;
+  const L = lot();
+  const m = guideMethod || (L && L.method) || 'washed';
   let h = `<div class="sec-title">Etapas</div>
     <div class="seg-ctl">${Object.keys(METHODS).map(k => `<button class="${k === m ? 'on' : ''}" data-act="guidem" data-m="${k}">${METHODS[k].l}</button>`).join('')}</div>
     <p class="hint" style="text-align:left;margin:10px 4px 14px">${METHODS[m].d}</p>`;
@@ -952,7 +963,7 @@ function renderOB() {
         <h2>Do pé à <em>xícara</em></h2>
         <p class="lead">Acompanhe cada lote de café caseiro: o que fazer em cada dia, quando pesar, quando está seco e quando torrar.</p>
         <p class="lead">Vamos mapear em que ponto você está. Leva menos de um minuto.</p>`;
-      foot = `<button class="btn" data-act="obnext">Começar</button>`;
+      foot = `<button class="btn" data-act="obnext">Começar um lote</button><button class="rz-link" data-act="obroast">Já tenho café verde, só quero torrar</button>`;
       break;
     case 'lot':
       body = `<h2>Seu lote</h2><p class="lead">Dê um nome para reconhecer este café depois.</p>
@@ -1055,17 +1066,7 @@ document.addEventListener('click', async e => {
     case 'dellot':
       if (confirm(`Apagar “${L.name}” e todos os registros dele?`)) {
         DB.lots = DB.lots.filter(x => x.id !== L.id); DB.active = (DB.lots.find(x => !x.archived) || DB.lots[0] || {}).id || null; save(); closeSheet();
-        function applyTheme() {
-  const t = DB.theme || 'auto', root = document.documentElement;
-  if (t === 'auto') root.removeAttribute('data-theme'); else root.dataset.theme = t;
-  const dark = t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
-  document.querySelectorAll('meta[name=theme-color]').forEach((m, i) => {
-    if (t === 'auto') { m.setAttribute('content', i ? '#1E140E' : '#F7F2EA'); m.setAttribute('media', `(prefers-color-scheme: ${i ? 'dark' : 'light'})`); }
-    else { m.setAttribute('content', dark ? '#1E140E' : '#F7F2EA'); m.removeAttribute('media'); }
-  });
-}
-applyTheme();
-if (!DB.lots.length) startOnboarding(true);
+        if (!DB.lots.length && !DB.roastOnly) startOnboarding(true);
       }
       break;
     case 'settings': settingsSheet(); break;
@@ -1078,9 +1079,11 @@ if (!DB.lots.length) startOnboarding(true);
 
     /* onboarding */
     case 'obnext': OB.step++; renderOB(); break;
-    case 'obback': if (OB.step === 0 || (OB.step === 1 && !OB.first)) { if (DB.lots.length) $('#ob').classList.remove('on'); else { OB.step = 0; renderOB(); } } else { OB.step--; renderOB(); } break;
+    case 'obback': if (OB.step === 0 || (OB.step === 1 && !OB.first)) { if (DB.lots.length || DB.roastOnly) $('#ob').classList.remove('on'); else { OB.step = 0; renderOB(); } } else { OB.step--; renderOB(); } break;
     case 'obmethod': if (OB.method !== b.dataset.m) OB.stage = null; OB.method = b.dataset.m; renderOB(); break;
     case 'obstage': OB.stage = b.dataset.k; renderOB(); break;
+    case 'obroast': DB.roastOnly = true; save(); $('#ob').classList.remove('on'); OB = null; goTab('torra'); renderAll(); break;
+    case 'gotab': closeSheet(); goTab(b.dataset.v); break;
     case 'obfinish': { const L2 = buildLot(); DB.lots.push(L2); DB.active = L2.id; save(); $('#ob').classList.remove('on'); OB = null; guideMethod = null; renderAll(); window.scrollTo({ top:0 }); toast('Lote criado'); break; }
   }
 });
@@ -1120,7 +1123,7 @@ document.addEventListener('touchend', e => {
   const now = Date.now();
   if (!moved && now - lastTouch < 350 && e.changedTouches.length === 1 && !e.target.closest('input, textarea, select')) {
     e.preventDefault(); // impede o zoom do toque duplo, mas mantém o toque funcionando
-    e.target.closest('[data-act], .tab, label')?.click();
+    e.target.closest('[data-act], [data-r], .tab, label')?.click();
   }
   lastTouch = moved ? 0 : now;
 }, { passive:false });
@@ -1134,6 +1137,7 @@ document.addEventListener('dblclick', e => e.preventDefault(), { passive:false }
 })();
 
 // tabs
+function goTab(v) { const t = document.querySelector(`.tab[data-v="${v}"]`); if (t) t.click(); }
 document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
   document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x === t));
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + t.dataset.v));
@@ -1142,12 +1146,22 @@ document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () =>
 }));
 window.addEventListener('scroll', () => $('#top').classList.toggle('scrolled', scrollY > 4), { passive:true });
 
+function emptyLot(where) {
+  return `<div class="empty-state"><h3>Nenhum lote em andamento</h3><p>${where}</p>
+    <button class="btn" data-act="newlot">Começar um lote</button><button class="rz-link" data-act="gotab" data-v="torra">Ir para a torra</button></div>`;
+}
 function renderAll() {
-  const L = lot();
-  if (!L) return;
-  $('#lotName').textContent = L.name + (L.archived ? ' · arquivado' : '');
-  const y = scrollY;
-  renderHoje(); renderCal(); renderPeso(); renderGuia();
+  const L = lot(), y = scrollY;
+  $('#lotName').textContent = L ? L.name + (L.archived ? ' · arquivado' : '') : 'Sem lote';
+  $('[data-act=settings]').style.visibility = L ? '' : 'hidden';
+  if (L) { renderHoje(); renderCal(); renderPeso(); }
+  else {
+    $('#v-hoje').innerHTML = emptyLot('Um lote acompanha o café da colheita à torra: o que fazer a cada dia e quando avançar.');
+    $('#v-cal').innerHTML = emptyLot('O calendário mostra as etapas do lote, dia a dia.');
+    $('#v-peso').innerHTML = emptyLot('A pesagem acompanha a secagem de um lote.');
+  }
+  renderGuia();
+  if (window.renderTorra) renderTorra();
   window.scrollTo(0, y);
 }
 let lastDay = today();
@@ -1163,10 +1177,11 @@ function applyTheme() {
   });
 }
 applyTheme();
-if (!DB.lots.length) startOnboarding(true);
-else { if (!lot()) DB.active = DB.lots[0].id; save(); renderAll(); }
+if (!DB.lots.length && !DB.roastOnly) startOnboarding(true);
+else { if (!lot() && DB.lots.length) DB.active = DB.lots[0].id; save(); renderAll(); if (!DB.lots.length) goTab('torra'); }
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
+<script src="roast.js"></script>
 </body>
 </html>
