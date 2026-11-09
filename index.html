@@ -286,11 +286,11 @@ main { padding:4px 16px calc(var(--tab-h) + var(--tb-b) + 28px); max-width:560px
 .tabs.min { width:56px; height:56px; padding:3px; }
 .tabs.min .tab:not(.on) { display:none; }
 .tabs.min .tab { font-size:0; gap:0; background:none; }
-:root{--tb-vidro:color-mix(in srgb,var(--card) 74%,transparent);--tb-acc:var(--crit);--tb-tinta:var(--ink2);--tb-aro-hi:rgba(255,255,255,.95);--tb-aro-lo:rgba(43,29,20,.12);--tb-gota:linear-gradient(180deg,rgba(255,255,255,.9),rgba(232,232,238,.6));--tb-sombra:rgba(43,29,20,.16)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--tb-vidro:color-mix(in srgb,var(--card) 72%,transparent);--tb-aro-hi:rgba(255,255,255,.2);--tb-aro-lo:rgba(0,0,0,.5);--tb-gota:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.07));--tb-sombra:rgba(0,0,0,.45)}}
-:root[data-theme="dark"]{--tb-vidro:color-mix(in srgb,var(--card) 72%,transparent);--tb-aro-hi:rgba(255,255,255,.2);--tb-aro-lo:rgba(0,0,0,.5);--tb-gota:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.07));--tb-sombra:rgba(0,0,0,.45)}
-/* vidro da barra (opção "B", 09/11/2026): aro de luz (brilho em cima, sombra fina embaixo); aba escolhida só na cor do app;
-   a gota de vidro aparece só enquanto o dedo está na barra (script "vidro da barra de abas") */
+:root{--tb-vidro:color-mix(in srgb,var(--card) 74%,transparent);--tb-acc:var(--crit);--tb-tinta:var(--ink2);--tb-aro-hi:rgba(255,255,255,.95);--tb-aro-lo:rgba(43,29,20,.12);--tb-gota:linear-gradient(180deg,rgba(255,255,255,.9),rgba(232,232,238,.6));--tb-gota-pousa:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,.05)) color-mix(in srgb,var(--tb-tinta) 11%,transparent);--tb-sombra:rgba(43,29,20,.16)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--tb-vidro:color-mix(in srgb,var(--card) 72%,transparent);--tb-aro-hi:rgba(255,255,255,.2);--tb-aro-lo:rgba(0,0,0,.5);--tb-gota:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.07));--tb-gota-pousa:linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,.03)) rgba(255,255,255,.07);--tb-sombra:rgba(0,0,0,.45)}}
+:root[data-theme="dark"]{--tb-vidro:color-mix(in srgb,var(--card) 72%,transparent);--tb-aro-hi:rgba(255,255,255,.2);--tb-aro-lo:rgba(0,0,0,.5);--tb-gota:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.07));--tb-gota-pousa:linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,.03)) rgba(255,255,255,.07);--tb-sombra:rgba(0,0,0,.45)}
+/* vidro da barra (09/11/2026): aro de luz (brilho em cima, sombra fina embaixo); aba escolhida na cor do app com uma gota de
+   vidro parada atrás; com o dedo na barra a gota vira lente e segue o dedo (script "vidro da barra de abas") */
 .tabs{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;background:var(--tb-vidro);-webkit-backdrop-filter:blur(16px) saturate(170%);backdrop-filter:blur(16px) saturate(170%);border-color:transparent;box-shadow:0 10px 30px var(--tb-sombra)}
 .tabs::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;padding:1px;z-index:2;background:linear-gradient(160deg,var(--tb-aro-hi),transparent 34%,transparent 66%,var(--tb-aro-lo));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
 .tabs > :not(.tb-gota){position:relative;z-index:1}
@@ -300,8 +300,9 @@ main { padding:4px 16px calc(var(--tab-h) + var(--tb-b) + 28px); max-width:560px
 .tabs .tab.on{font-weight:700}
 .tabs .tab.on svg,.tabs .tab.tb-sob svg{color:var(--tb-acc)}
 .tabs .tab:active{transform:none}
-.tb-gota{position:absolute;left:0;top:4px;z-index:0;border-radius:999px;pointer-events:none;opacity:0;background:var(--tb-gota);box-shadow:0 6px 18px var(--tb-sombra),inset 0 1px 0 var(--tb-aro-hi),inset 0 0 0 .5px var(--tb-aro-lo);-webkit-backdrop-filter:blur(3px) saturate(160%) brightness(1.08);backdrop-filter:blur(3px) saturate(160%) brightness(1.08);transition:opacity .25s,transform .32s cubic-bezier(.3,1.35,.5,1)}
-.tb-gota.on{opacity:1}
+.tb-gota{position:absolute;left:0;top:4px;z-index:0;border-radius:999px;pointer-events:none;opacity:0;background:var(--tb-gota-pousa);box-shadow:inset 0 1px 0 var(--tb-aro-hi),inset 0 0 0 .5px var(--tb-aro-lo);transform-origin:center;transition:opacity .25s,transform .42s cubic-bezier(.3,1.25,.5,1),background .22s,box-shadow .22s}
+.tb-gota.pousa,.tb-gota.on{opacity:1}
+.tb-gota.on{background:var(--tb-gota);box-shadow:0 6px 18px var(--tb-sombra),inset 0 1px 0 var(--tb-aro-hi),inset 0 0 0 .5px var(--tb-aro-lo);-webkit-backdrop-filter:blur(3px) saturate(160%) brightness(1.08);backdrop-filter:blur(3px) saturate(160%) brightness(1.08)}
 .tabs.min .tb-gota{display:none}
 @media (prefers-reduced-motion: reduce){.tb-gota{transition:opacity .15s}}
 @media (prefers-reduced-motion: reduce) { .tabs, .tab { transition:none; } }
@@ -1241,52 +1242,80 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catc
 })();
 </script>
 <script>
-/* Vidro da barra de abas (opção "B", 09/11/2026): a aba escolhida só muda para a cor do app; enquanto o dedo está na
-   barra aparece uma gota de vidro que cresce, segue o dedo e acende a aba de baixo; ao soltar, encaixa nela e some.
-   Arrastar até outra aba e soltar troca de aba, como no iOS 26. */
+/* Vidro da barra de abas (09/11/2026): uma gota de vidro fica sob a aba escolhida (que também fica na cor do app);
+   ao trocar de aba ela escorrega até a nova. Com o dedo na barra, a gota cresce, segue o dedo e acende a aba de baixo;
+   ao soltar, encaixa nela. Arrastar até outra aba e soltar troca de aba, como no iOS 26. */
 (function () {
-  var bar = document.querySelector('.tabs'), SEL = '.tab';
+  var bar = document.querySelector('.tabs'), SEL = '.tab', CUR = '.on';
   if (!bar) return;
-  var gota = null, toque = null, ignoraAte = 0;
+  var gota = null, toque = null, ignoraAte = 0, ultX = null;
   var reduz = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   function abas() { return [].filter.call(bar.querySelectorAll(SEL), function (a) { return a.offsetWidth > 0; }); }
+  function garante() {
+    if (!gota || gota.parentNode !== bar) {
+      gota = document.createElement('i'); gota.className = 'tb-gota'; gota.setAttribute('aria-hidden', 'true'); bar.appendChild(gota);
+      if (ultX != null) { gota.style.transition = 'none'; gota.style.transform = 'translateX(' + ultX + 'px)'; }
+    }
+    return gota;
+  }
   function sob(x) {
-    var l = abas(), m = null, d = 1e9;
-    l.forEach(function (a) { var r = a.getBoundingClientRect(), c = Math.abs(x - (r.left + r.width / 2)); if (c < d) { d = c; m = a; } });
+    var m = null, d = 1e9;
+    abas().forEach(function (a) { var r = a.getBoundingClientRect(), c = Math.abs(x - (r.left + r.width / 2)); if (c < d) { d = c; m = a; } });
     return m;
   }
-  function poe(x, lente) {
-    var a = sob(x); if (!a) return null;
+  function mede(a, x, lente) {
     var rb = bar.getBoundingClientRect(), ra = a.getBoundingClientRect(), w = ra.width;
     var cx = lente ? Math.max(rb.left + 4 + w / 2, Math.min(rb.right - 4 - w / 2, x)) : ra.left + w / 2;
     gota.style.width = w + 'px'; gota.style.height = ra.height + 'px'; gota.style.top = (ra.top - rb.top) + 'px';
-    gota.style.transform = 'translateX(' + (cx - rb.left - w / 2) + 'px)' + (lente ? ' scale(1.16, 1.1)' : '');
-    abas().forEach(function (b) { b.classList.toggle('tb-sob', b === a); });
+    ultX = cx - rb.left - w / 2;
+    gota.style.transform = 'translateX(' + ultX + 'px)' + (lente ? ' scale(1.16, 1.1)' : '');
+  }
+  // gota parada sob a aba escolhida
+  var pend = 0;
+  function pousa(anima) {
+    if (toque || bar.hidden || bar.classList.contains('min')) return;
+    var a = bar.querySelector(SEL + CUR); garante();
+    if (!a || !a.offsetWidth) { gota.classList.remove('pousa'); return; }
+    if (!anima || reduz) gota.style.transition = 'none';
+    mede(a, 0, false); gota.classList.add('pousa');
+    if (!anima || reduz) { void gota.offsetWidth; gota.style.transition = ''; }
+  }
+  function agenda(anima) { cancelAnimationFrame(pend); pend = requestAnimationFrame(function () { pousa(anima); }); }
+  new MutationObserver(function (ms) {
+    if (ms.every(function (m) { return m.target === gota; })) return;
+    agenda(true);
+  }).observe(bar, { subtree: true, childList: true, attributes: true, attributeFilter: ['aria-current', 'class', 'hidden'] });
+  bar.addEventListener('transitionend', function (e) { if (e.target === bar) agenda(false); });   // depois de encolher/abrir
+  window.addEventListener('resize', function () { agenda(false); });
+  window.addEventListener('pageshow', function () { agenda(false); });
+  agenda(false);
+  // dedo na barra: a gota vira lente e segue o dedo
+  function poe(x, lente) {
+    var a = sob(x); if (!a) return null;
+    mede(a, x, lente);
+    abas().forEach(function (b) { b.classList.toggle('tb-sob', lente && b === a); });
     return a;
   }
   bar.addEventListener('pointerdown', function (e) {
     if (bar.classList.contains('min') || (e.pointerType === 'mouse' && e.button !== 0)) return;
-    if (!gota || gota.parentNode !== bar) { gota = document.createElement('i'); gota.className = 'tb-gota'; gota.setAttribute('aria-hidden', 'true'); bar.appendChild(gota); }
-    toque = { x0: e.clientX, mexeu: false, a0: sob(e.clientX) };
-    gota.style.transition = 'none'; poe(e.clientX, true);
-    void gota.offsetWidth; gota.style.transition = ''; gota.classList.add('on');
+    garante();
+    toque = { x0: e.clientX, mexeu: false };
+    gota.classList.add('on'); poe(e.clientX, true);
   });
   bar.addEventListener('pointermove', function (e) {
     if (!toque) return;
     if (Math.abs(e.clientX - toque.x0) > 8) toque.mexeu = true;
-    gota.style.transition = 'opacity .22s'; poe(e.clientX, true);
+    gota.style.transition = 'opacity .22s, background .22s, box-shadow .22s'; poe(e.clientX, true);
   });
   function fim(e, cancela) {
     if (!toque) return;
     var t = toque; toque = null;
-    gota.style.transition = reduz ? 'opacity .15s' : '';
-    var a = poe(cancela ? t.x0 : e.clientX, false);
+    gota.style.transition = '';
+    var a = cancela ? null : sob(e.clientX);
     gota.classList.remove('on');
     abas().forEach(function (b) { b.classList.remove('tb-sob'); });
-    if (!cancela && t.mexeu && a) {               // arrastou até outra aba: troca para ela
-      ignoraAte = Date.now() + 600;
-      if (!a.matches('.on')) a.click();
-    }
+    if (a && !a.matches(CUR)) { mede(a, 0, false); if (t.mexeu) { ignoraAte = Date.now() + 350; a.click(); } }   // um toque simples segue pelo clique normal
+    else agenda(true);
   }
   bar.addEventListener('dragstart', function (e) { e.preventDefault(); });   // links não viram arrasto do navegador
   bar.addEventListener('pointerup', function (e) { fim(e, false); });
