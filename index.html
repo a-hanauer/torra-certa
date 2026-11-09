@@ -28,7 +28,7 @@
   --field:#FFFFFF; --on-c:#FFFFFF; --scrim:rgba(43,29,20,.32); --shadow:rgba(43,29,20,.12);
   color-scheme:light;
   --safe-t:env(safe-area-inset-top); --safe-b:env(safe-area-inset-bottom);
-  --tab-h:58px;
+  --tab-h:64px;
 }
 /* ---------- modo escuro: fundo de café ---------- */
 :root[data-theme="dark"] {
@@ -79,7 +79,7 @@ input, textarea { font:inherit; color:inherit; }
 .iconbtn { width:38px; height:38px; flex:none; border-radius:19px; display:grid; place-items:center; border:1px solid var(--line); background:var(--card); }
 .iconbtn svg { width:19px; height:19px; stroke:var(--ink); }
 
-main { padding:4px 16px calc(var(--tab-h) + var(--safe-b) + 24px); max-width:560px; margin:0 auto; }
+main { padding:4px 16px calc(var(--tab-h) + var(--tb-b) + 28px); max-width:560px; margin:0 auto; }
 .view { display:none; }
 .view.on { display:block; animation:fade .22s ease; }
 @keyframes fade { from { opacity:0; transform:translateY(4px); } }
@@ -264,16 +264,29 @@ main { padding:4px 16px calc(var(--tab-h) + var(--safe-b) + 24px); max-width:560
 .mini.estd { border-style:dashed; background-image:repeating-linear-gradient(135deg, transparent 0 4px, color-mix(in srgb, var(--card) 55%, transparent) 4px 6px); }
 .mini.ms::after { content:"◆"; position:absolute; right:3px; top:1px; font-size:7px; color:var(--dry); }
 
-/* ---------- tab bar ---------- */
+/* ---------- tab bar: cápsula de vidro flutuando, como no iOS 26; ao rolar para baixo encolhe para uma bolinha com a
+   aba atual (script "barra de abas flutuante" no fim da página) e volta ao rolar para cima ou ao tocar nela ---------- */
+:root { --tb-b:max(10px, calc(var(--safe-b) - 12px)); --tb-hi:rgba(255,255,255,.45); --tb-on:color-mix(in srgb, var(--ink) 8%, transparent); }
+:root[data-theme="dark"] { --tb-hi:rgba(255,255,255,.08); --tb-on:rgba(255,255,255,.10); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --tb-hi:rgba(255,255,255,.08); --tb-on:rgba(255,255,255,.10); } }
 .tabs {
-  position:fixed; left:0; right:0; bottom:0; z-index:30; display:flex; justify-content:space-around;
-  padding:6px 8px calc(var(--safe-b) + 4px); height:calc(var(--tab-h) + var(--safe-b));
-  background:color-mix(in srgb, var(--paper) 90%, transparent); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
-  border-top:1px solid var(--line);
+  position:fixed; z-index:30; display:flex; align-items:stretch; overflow:hidden;
+  left:max(14px, env(safe-area-inset-left, 0px), calc(50% - 260px)); width:min(520px, calc(100% - 28px));
+  bottom:var(--tb-b); height:64px; padding:4px; border-radius:32px;
+  background:color-mix(in srgb, var(--card) 58%, transparent);
+  -webkit-backdrop-filter:blur(22px) saturate(180%); backdrop-filter:blur(22px) saturate(180%);
+  border:.5px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  box-shadow:0 12px 32px var(--shadow), inset 0 1px 0 var(--tb-hi);
+  transition:width .42s cubic-bezier(.25,.9,.3,1.05), height .42s cubic-bezier(.25,.9,.3,1.05), padding .42s;
 }
-.tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10.5px; font-weight:600; color:var(--ink3); padding-top:4px; text-align:center; }
-.tab svg { width:24px; height:24px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
-.tab.on { color:var(--ink); }
+.tab { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; font-size:10.5px; font-weight:600; color:var(--ink3); text-align:center; border-radius:28px; white-space:nowrap; transition:background .2s, transform .15s; }
+.tab:active { transform:scale(.93); }
+.tab svg { width:24px; height:24px; flex:none; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.tab.on { color:var(--ink); background:var(--tb-on); }
+.tabs.min { width:56px; height:56px; padding:3px; }
+.tabs.min .tab:not(.on) { display:none; }
+.tabs.min .tab { font-size:0; gap:0; background:none; }
+@media (prefers-reduced-motion: reduce) { .tabs, .tab { transition:none; } }
 
 /* ---------- sheet ---------- */
 .scrim { position:fixed; inset:0; z-index:40; background:var(--scrim); opacity:0; pointer-events:none; transition:opacity .25s; }
@@ -307,7 +320,7 @@ textarea { width:100%; min-height:84px; border:1px solid var(--line); border-rad
 .lotrow .nm { flex:1; font-size:15px; font-weight:600; }
 .lotrow .nm small { display:block; font-weight:400; font-size:12.5px; color:var(--ink3); margin-top:1px; }
 .lotrow .on { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink2); }
-.toast { position:fixed; left:50%; bottom:calc(var(--tab-h) + var(--safe-b) + 16px); transform:translate(-50%, 20px); z-index:80; background:var(--ink); color:var(--paper); font-size:14px; font-weight:500; padding:10px 16px; border-radius:22px; opacity:0; transition:all .25s; pointer-events:none; white-space:nowrap; }
+.toast { position:fixed; left:50%; bottom:calc(var(--tab-h) + var(--tb-b) + 14px); transform:translate(-50%, 20px); z-index:80; background:var(--ink); color:var(--paper); font-size:14px; font-weight:500; padding:10px 16px; border-radius:22px; opacity:0; transition:all .25s; pointer-events:none; white-space:nowrap; }
 .toast.on { opacity:1; transform:translate(-50%, 0); }
 
 /* ---------- onboarding ---------- */
@@ -1184,5 +1197,30 @@ else { if (!lot() && DB.lots.length) DB.active = DB.lots[0].id; save(); renderAl
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 <script src="roast.js"></script>
+<script>
+/* Barra de abas flutuante, como no iOS 26: encolhe para uma bolinha com a aba atual ao rolar para baixo e volta
+   inteira ao rolar para cima, ao chegar no topo, ao trocar de aba ou ao tocar nela. */
+(function () {
+  var bar = document.querySelector('.tabs');
+  if (!bar) return;
+  var last = 0, min = false, trava = 0;
+  function poe(v) { if (v === min) return; min = v; bar.classList.toggle('min', v); }
+  document.addEventListener('scroll', function (e) {
+    var t = e && e.target;
+    if (t && t.nodeType === 1 && t !== document.documentElement && t !== document.body) return;   // só a rolagem da página (a folha e o guia de início não mexem)
+    var y = window.scrollY || document.documentElement.scrollTop || 0;
+    if (Date.now() < trava) { last = y; return; }
+    if (y < 30) poe(false);
+    else if (y - last > 6) poe(true);
+    else if (last - y > 6) poe(false);
+    last = y;
+  }, { capture: true, passive: true });
+  // tocar na bolinha só abre a barra (não troca de aba)
+  bar.addEventListener('click', function (e) {
+    if (!min) { last = 0; trava = Date.now() + 450; return; }
+    e.preventDefault(); e.stopImmediatePropagation(); poe(false); trava = Date.now() + 450;
+  }, true);
+})();
+</script>
 </body>
 </html>

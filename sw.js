@@ -1,5 +1,5 @@
 // Torra Certa — cache para funcionar offline
-const CACHE = 'torra-certa-v8';
+const CACHE = 'torra-certa-v9';
 const CORE = ['./', './index.html', './roast.js', './roast.css', './manifest.webmanifest', './icons/apple-touch-icon.png', './icons/icon-192.png', './icons/icon.svg', './icons/favicon-32.png'];
 
 self.addEventListener('install', e => {
