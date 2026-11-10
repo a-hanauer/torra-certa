@@ -390,6 +390,9 @@ textarea { width:100%; min-height:84px; border:1px solid var(--line); border-rad
 :root[data-theme="dark"] .seg-ctl button.on { background:color-mix(in srgb, var(--card) 70%, #fff 12%); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .seg-ctl button.on { background:color-mix(in srgb, var(--card) 70%, #fff 12%); } }
 @media (prefers-reduced-motion: reduce) { .iconbtn, .close, .rz .rz-x, .seg-ctl button { transition:none; } }
+
+/* cabeçalho da sheet preso: o ✕ fica sempre à mão enquanto o conteúdo rola por baixo */
+.sheet .shead { position:sticky; top:-8px; z-index:2; margin:0 -20px 14px; padding:6px 20px 10px; background:color-mix(in srgb, var(--paper) 88%, transparent); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); }
 </style>
 </head>
 <body>
